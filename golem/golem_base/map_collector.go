@@ -83,23 +83,26 @@ runs predictions on keys of types
 */
 func (m *MapCollector) Predict(mode string) {
 
-	if mode != "threshold" && mode != "split" {
-		panic(fmt.Sprintf("invalid mode %s", mode))
-	}
-
-	if mode == "split" {
-		panic("still not finished")
-	}
-
 	m.predictedTypes = make(map[int]string, 0)
 	m.predictMode = mode
 
-	for k := range m.datos {
-		t := m.PredictKeyOfTypeByRequiredThreshold(k, DEFAULT_DOMINANCE_RATIO)
-		m.predictedTypes[k] = t
-	}
+	switch {
+
+	case mode == "threshold" || mode == "majority": 
+		for k := range m.datos {
+			m.predictedTypes[k] = m.PredictKeyOfTypeByMode(mode, k, DEFAULT_DOMINANCE_RATIO)
+		}
+
+	case mode == "split": 
+		panic("split mode not finished")
+
+	default: 
+		panic(fmt.Sprintf("invalid mode %s", mode))
 }
 
+}
+
+//// TODO: int and float types may be confused w/ one another. 
 /*
 predicts key by dominance ratio
 */
@@ -118,6 +121,8 @@ func (m *MapCollector) PredictKeyOfType(x int) (string, float64) {
 
 	var highestRatio float64 = 0
 	var predictedKey string = "?" 
+	
+	//// TODO: below will confuse int and float types 
 	for k,v := range r {
 
 		if k == "?" {
@@ -129,27 +134,37 @@ func (m *MapCollector) PredictKeyOfType(x int) (string, float64) {
 			highestRatio = ratio
 			predictedKey = k
 		}
+		
+	} 
+		/////// below will correct for confusing int and float
+	if predictedKey == "int" && r["float"] > 0 {
+		predictedKey = "float" 
+		highestRatio += (float64(r["float"]) / float64(s))
 	}
+
 
 	return predictedKey, highestRatio
 }
 
 /*
 */
-func (m *MapCollector) PredictKeyOfTypeByRequiredThreshold(x int, threshold float64) string {
+func (m *MapCollector) PredictKeyOfTypeByMode(mode string, x int, threshold float64) string {
 	s, f := m.PredictKeyOfType(x)
 
-	if m.DominanceRatio(f, threshold) {
-		return s 
+	switch {
+	case mode == "threshold": 
+		if m.DominanceRatio(f, threshold) {
+			return s 
+		}
+
+		return "?"
+	
+	case mode == "majority":
+		return s
+
+	default: 
+		panic("invalid mode for predicting key")
+
 	}
-
-	return "?"
-}
-
-/// TODO: incomplete
-/*
-use this for multi-output of predicted type
-*/
-func (m *MapCollector) PredictKeyOfTypeSplitDecision(numSplitDecisions int) {
 
 }

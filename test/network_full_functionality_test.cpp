@@ -8,7 +8,6 @@ file will contain code to test accuracy of executing network functionality.
 #include <time.h> 
 using namespace std;
 
-
 /*
 all nodes except 0 are in self-mode 
 */ 
@@ -43,14 +42,6 @@ TEST(NetworkRunTimestampWithNodeDeletion, RunWithNodeDeletionCorrect) {
         cout << "\n\n" << endl;
     }
 
-    /// TODO: delete below. 
-        /*
-    for (auto x: N.contents) {
-        cout << "SUMMARY FOR NODE " << x.first << endl; 
-        (x.second)->SummarizeLastNTimestamps(1000); 
-    } 
-        */ 
-
     // mark 0, 3 as bankrupt, run and check. 
     auto b0 = N.contents[0]->GetBank(); 
     b0->currency = float(-106725); 
@@ -65,12 +56,14 @@ TEST(NetworkRunTimestampWithNodeDeletion, RunWithNodeDeletionCorrect) {
 /*
 // description 
 Initializes a contract b/t nodes 0 and 9. Bankrupts node 9 and checks if contract 
-is still effective. 
-*/ 
+is still active. 
+*/
+///TODO: 
+//Contract is still active, status of node 9 unknown to 0. 
 TEST(NetworkRunTimestampNodeDeletionAndContract, NodeDeletionContractCorrect) {
-
-    vector<int> x = vector<int>{1,2,3,4,5,6,7,8}; 
-    Network N = Network1WithNodesInSelfMode(x);
+    set<int> x = set<int>{1,2,3,4,5,6,7,8};
+    Network N = Network1(); 
+    SetNetworkNodesActiveStatus(&N,x,"inactive"); 
     RunNetworkDFSProcessOnActiveNodes(&N); 
     N.mortality = true; 
 
@@ -87,7 +80,11 @@ TEST(NetworkRunTimestampNodeDeletionAndContract, NodeDeletionContractCorrect) {
 
     // run timestamp for making contract 
     N.RunOneTimestamp(1);
-    n0->SetToManualInput(false); 
+    //n0->SetToManualInput(false);
+
+    cout << "[0] active contracts for 0" << endl; 
+    (N.contents[0])->DisplayActiveContracts(); 
+
 
     // run timestamp for contract activity 
     auto bankBefore = N.contents[0]->GetWorth();  
@@ -107,7 +104,7 @@ TEST(NetworkRunTimestampNodeDeletionAndContract, NodeDeletionContractCorrect) {
 
         // below contracts will not activate, but node 0 does not know node 9 is dead. 
     e1 = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "contract activity"); 
-    
+    ///cout << "NODE DATA FOR CONTRACT " << e1 << endl; 
     auto tsuc = FetchNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "contract activity"); 
     ASSERT_EQ(tsuc != nullptr,true);
     ASSERT_EQ(tsuc->impact, 0);  
@@ -118,6 +115,7 @@ TEST(NetworkRunTimestampNodeDeletionAndContract, NodeDeletionContractCorrect) {
     tsuc = FetchNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "contract activity"); 
     ASSERT_EQ(tsuc != nullptr,true);
     ASSERT_EQ(tsuc->impact, 0);   
+
     return; 
 }
 
@@ -236,7 +234,7 @@ TEST(Network__CollectData__, CollectingData) {
 
 
      // generate the random network.  
-    Network N = GenerateRandomNetwork(0, true, "folder14", 20, 0.5, "fode"); 
+    Network N = Network::GenerateRandomNetwork(0, true, false, "folder14", 20, 0.5, "fode"); 
 
     // set all nodes to discoveryType limit mode 
     for (auto c: N.contents) {
@@ -260,30 +258,13 @@ TEST(Network__CollectData__, CollectingData) {
     DisplayIterable(N.deceased);
 }
 
-TEST(Network__CollectData_RandomNetwork_RunRandomNodeNatureVars, CollectingData2) {
+///////////////////////////// TODO: for more testing below 
 
-     // generate the random network.  
-    Network N = GenerateRandomNetwork(0, true, "rnnv_0", 20, 0.5, "node"); 
-
-    // set all nodes to discoveryType limit mode 
-    for (auto c: N.contents) {
-        c.second->SetDiscoveryType("limit");        
-    }
-
-    time_t t1; 
-    time(&t1);  /* get current time; same as: timer = time(NULL)  */
-    time_t t2; 
-    time(&t2);
-
-    cout << "NUM ROUNDS " << N.timestamp << endl;  
-    cout << "ELAPSED " << difftime(t2, t1) << endl; 
-    printf ("%.f seconds", difftime(t2,t1));
-    cout << "node timestamp deaths" << endl;
-    DisplayIterable(N.deceased);
-}
-
+/*
+runs an interesting case
+*/ 
 TEST(Network__RunTestGraph, RunSuccess) { 
-  Network N(1, false);
+  Network N(1, true, false);
 
   NVMBNode* n0 = new NVMBNode(0, "node_0");
   NVMBNode* n1 = new NVMBNode(1, "node_1");
@@ -294,3 +275,54 @@ TEST(Network__RunTestGraph, RunSuccess) {
 
   N.Run(1, 100); 
 }
+
+/// TODO:
+TEST(Network__CollectData_RandomNetwork_RunRandomNodeNatureVars, CollectingData2) {
+
+     // generate the random network.  
+    Network N = Network::GenerateRandomNetwork(0, true, false, "rnnv_0", 20, 0.5, "node"); 
+
+    // set all nodes to discoveryType limit mode 
+    for (auto c: N.contents) {
+        c.second->SetDiscoveryType("limit");        
+    }
+
+    time_t t1; 
+    time(&t1);
+    N.RunRandomNodeNatureVars(0, 200, 0.2); 
+    time_t t2; 
+    time(&t2);
+
+    cout << "NUM ROUNDS " << N.timestamp << endl;  
+    cout << "ELAPSED " << difftime(t2, t1) << endl; 
+    printf ("%.f seconds", difftime(t2,t1));
+    cout << "node timestamp deaths" << endl;
+    DisplayIterable(N.deceased);
+}
+
+/// TODO:
+TEST(Network__CollectData_RandomNetwork_RunRandomPatternStyleNodeNatureVars, CollectingData) {
+
+     // generate the random network.  
+    Network N = Network::GenerateRandomNetwork(0, true, false, "rnnv_1", 10, 0.5, "node");
+
+    // set all nodes to discoveryType limit mode 
+    for (auto c: N.contents) {
+        c.second->SetDiscoveryType("limit");
+    }
+
+    time_t t1;
+    time(&t1); 
+    N.RunRandomPatternStyleNodeNatureVars(0, 200, 0.1, "each", "delta");
+
+    time_t t2; 
+    time(&t2);
+
+    cout << "NUM ROUNDS " << N.timestamp << endl;  
+    cout << "ELAPSED " << difftime(t2, t1) << endl; 
+    printf ("%.f seconds", difftime(t2,t1));
+    cout << "node timestamp deaths" << endl;
+    DisplayIterable(N.deceased);
+}
+
+/////////// 

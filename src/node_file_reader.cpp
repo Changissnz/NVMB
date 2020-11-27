@@ -17,7 +17,8 @@ string DATA_DIRECTORY = "/src/data";
 vector<string> TIMESTAMP_HEADER = {"time", "event_type", "impact", "role", "nodes", 
     "responses", "currency", "neighbors", "contracts", "transmission", "cfAcceptanceRate",
     "competition", "greed", "negotiation", "growth", "nodeRank", "knownNodes", "competitors",
-    "numPathsRatio", "pathsInfo"};
+    "numPathsRatio", "pathsInfo", "competitionMeasure", "contractMeasure", "newContractMeasure",
+    "bondAdvantageMeasure", "bondDeletionAdvantageMeasure"};
 
 /*
 checks for existence of file at current working directory
@@ -233,12 +234,7 @@ int NodeFileReader::TravelToBaseDir() {
   char cwd[256];
   char* buff = getcwd(cwd, sizeof(cwd));
   string b(buff);
-  cout << "STRINGGY " << b << endl;
   vector<string> x = SplitStringToVector(b, "/");
-
-  for (auto x_ : x) {
-    cout << "YES " << x_ << endl; 
-  }
 
   // iterate through and find base directory
   int q = x.size() -1;

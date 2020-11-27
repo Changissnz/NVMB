@@ -5,7 +5,6 @@ float AccumulateContractRisk(float risk, Contract* c) {
   return risk + c->pathRisk;
 }
 
-/// TODO: needs error-checking 
 /*
 // description
 iterates through Node's best paths and adds them to pertinent edges.
@@ -89,7 +88,6 @@ void Network::NormalizeMap(string mapLabel) {
 // description
 Counts frequencies of edges and their respective nodes. These frequency values
 will be used to derive EdgeRisk and NodeRank scores.
-
 */
 /// CAUTION: no error-handling
 void Network::CalculateEdgeRisks() {
@@ -105,6 +103,18 @@ void Network::CalculateEdgeRisks() {
   NormalizeMap("edge");
   NormalizeMap("node");
 }
+
+/// TODO: not yet coded.
+/*
+the counts for edge risks are based on both comm flares and discovery flares, 
+the data is collected during each timestamp.
+*/ 
+/////
+/*
+void Network::CalculateEdgeRisksByInstant() {
+}
+*/
+/////
 
 ///////////////// MOVE THESE METHODS TO NETWORK-NODE-TRANSFER /////////////////
 
@@ -123,8 +133,7 @@ void Network::TransferRankToNodes() {
 }
 
 
-//// TODO : this needs work!!
-/// TODO OPTIMIZATION: instead of re-calculating this data every timestamp, instead
+/// OPTIMIZATION: instead of re-calculating this data every timestamp, instead
 ///       keep a running total and keep track of new contracts and recently deleted
 ///       contracts.
 /*
@@ -217,7 +226,6 @@ void Network::NetworkDataUpdateToNodes() {
     TransferContractInfoToNodes();
 }
 
-// TODO: untested
 pair<vector<int>, bool> Network::GetValidPathFromSourceToTarget(int sourceNode, int targetNode) {
 
   if (contents.find(sourceNode) == contents.end()) {
@@ -262,7 +270,6 @@ replies to a Node's request for information
 */
 void Network::ReplyToInfoRequest(int NodeId) {
 }
-
 
 set<CommFlare*> Network::RetrieveAllCFOfType(string cfType) {
   set<CommFlare*> heldCF;

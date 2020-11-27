@@ -15,10 +15,15 @@ import (
 	"fmt"
 	"io"
 	"sync"
-	"sort" 
+	"sort"
+	"gonum.org/v1/gonum/mat"
+	"bufio"
+	"bytes"
 )
 
 var WRITESIZE int64 = 10000 // numRows * numCols
+var DATA_LENGTH_READ_CAP int64 = 2000000
+var DEFAULT_TIME_COLUMN_LABEL string = "time"
 
 /*
 calculates sampling size given the `size`  
@@ -50,12 +55,17 @@ type ConcurrentFileBlockReader struct {
 	blockDataSize     int64
 	blockMapCollector *MapCollector
 
+	fileLength int64
+	partitionLength int64
+
 	analyses []string
 	columns  []string
+	excludedColumnIndices []int ///@ 
 
 	// key: column index
 	// value: string|int|int32|int64|float32|float64
 	columnTypes map[int]string
+	stringColumnEncodings map[int]map[string]float64
 	oi *BasicSet
 	flsFileObj *fls.File
 }
@@ -68,11 +78,14 @@ func OneConcurrentFileBlockReader(fp string) *ConcurrentFileBlockReader {
 	c := ConcurrentFileBlockReader{fp: fp, ofp: "nonatos", marker: 0,
 		blockData:   make([]*Block, 0),
 		analyses:    make([]string, 0),
-		columns:     make([]string, 0),
+		//columns:     make([]string, 0),
 		columnTypes: make(map[int]string, 0),
 	}
 
-	c.ReadHeader()
+	if fp != "" {
+		c.ReadHeader()
+	}
+
 	return &c
 }
 
@@ -93,8 +106,7 @@ func (c *ConcurrentFileBlockReader) ReadHeader() {
 		panic("cannot read file column header")
 	}
 
-	c.flsFileObj.SeekLine(int64(1), io.SeekStart)
-	c.lineMarker = 1 
+	c.SetReaderToBeginning()
 }
 
 /*
@@ -107,7 +119,50 @@ func (c *ConcurrentFileBlockReader) ReadBlockAtLine(bl int) (*Block, int64, bool
 		panic(fmt.Sprintf("cannot read line %d", bl))
 	}
 
-	return c.ReadBlockAtSpot(CPARTSIZE)
+	return c.ReadBlockAtSpot(CPARTSIZE, true) 
+}
+
+func (c *ConcurrentFileBlockReader) SetReaderToBeginning() { 
+	c.flsFileObj.SeekLine(int64(1), io.SeekStart)
+	c.lineMarker = 1
+}
+
+/*
+scans through file and determines its length
+*/ 
+func (c *ConcurrentFileBlockReader) PrelimRead() {
+	c.fileLength = 0
+	c.partitionLength = 0
+	
+    buf := make([]byte, bufio.MaxScanTokenSize)
+    for {
+        bufferSize, err := c.flsFileObj.Read(buf)
+        if err != nil && err != io.EOF {
+			panic("invalid file, could not read line")
+        }
+
+        var buffPosition int
+        for {
+            i := bytes.IndexByte(buf[buffPosition:], '\n')
+            if i == -1 || bufferSize == buffPosition {
+                break
+            }
+            buffPosition += i + 1
+			c.fileLength++
+		}
+		
+		/// case: file exceeds DATA_LENGTH_READ_CAP, stop here.
+		if c.fileLength >= DATA_LENGTH_READ_CAP {
+			break
+		}
+
+        if err == io.EOF {
+            break
+        }
+    }
+
+	c.partitionLength = int64(int(c.fileLength) / CPARTSIZE)
+	c.SetReaderToBeginning()
 }
 
 /*
@@ -118,7 +173,7 @@ return:
 - size of block 
 - finished reading
 */
-func (c *ConcurrentFileBlockReader) ReadBlockAtSpot(bs int) (*Block, int64, bool) {
+func (c *ConcurrentFileBlockReader) ReadBlockAtSpot(bs int, collectData bool) (*Block, int64, bool) {
 	
 	c.flsFileObj.SeekLine(c.lineMarker, io.SeekStart)	
 	reader := csv.NewReader(c.flsFileObj)
@@ -126,24 +181,44 @@ func (c *ConcurrentFileBlockReader) ReadBlockAtSpot(bs int) (*Block, int64, bool
 
 	var blockSize int = 0
 	for i := 0; i < bs; i++ {
-		out, err := reader.Read()
-		if err != nil {
-			c.lineMarker += int64(i + 1) 
-			return b, int64(i), true
-		}
 
-		b.AddOne(out)
-		blockSize += len(c.columns)
+		switch {
+		/// TODO: refactor below
+		case collectData == true: 
+			out, err := reader.Read()
+			if err != nil {
+				c.lineMarker += int64(i + 1) 
+				return b, int64(i), true
+			}
+			///fmt.Println("LEN OUT [0]: ", len(out))
+			if len(c.excludedColumnIndices) != 0 {
+				///fmt.Println("Y")
+				out = StringSliceCollectByIndices(out, c.excludedColumnIndices, true)
+			}
+			///fmt.Println("LEN OUT ", len(out))
+			b.AddOne(out)
+			blockSize += len(c.columns)
+		default: 
+			_, err := reader.Read()
+			if err != nil {
+				c.lineMarker += int64(i + 1) 
+				return b, int64(i), true
+			}
+			blockSize += len(c.columns)
+
+		}
 	}
 
 	c.lineMarker += int64(bs)
 	return b, int64(blockSize), false
 }
 
+
+
 /*
 */
 func (c *ConcurrentFileBlockReader) ReadBlockAtSpotFullTimestamp(bs int) (*Block, int64, bool) {
-	block, bs_, stat := c.ReadBlockAtSpot(bs) 
+	block, bs_, stat := c.ReadBlockAtSpot(bs, true) 
 
 	// case: finished 
 	if stat {
@@ -156,15 +231,14 @@ func (c *ConcurrentFileBlockReader) ReadBlockAtSpotFullTimestamp(bs int) (*Block
 	}
 
 	// get last timestamp
-	index := StringIndexInSlice(c.columns, "time")
+	index := StringIndexInSlice(c.columns, DEFAULT_TIME_COLUMN_LABEL)
 	r,_ := block.Dims() 
-
 	ts,_ := strconv.Atoi(block.GetAtOne([]int{r - 1, index}))
 	c.flsFileObj.SeekLine(c.lineMarker, io.SeekStart)
 	reader := csv.NewReader(c.flsFileObj)
-
 	i := 0
 	for {
+
 		// case: end of file 
 		out, err := reader.Read()
 		if err != nil {
@@ -189,10 +263,12 @@ func (c *ConcurrentFileBlockReader) ReadBlockAtSpotFullTimestamp(bs int) (*Block
 	return block,bs_,false
 }
 
-
 /*
 reads a partition's worth of data from `flsFileObj` starting at its
 current pointer
+
+arguments: 
+- readType: full|exact
 
 return: 
 - size of partition 
@@ -206,11 +282,14 @@ func (c *ConcurrentFileBlockReader) ReadPartition(readType string) int64 {
 	var stat bool
 
 	for {
+		///fmt.Println("read one block")
 		switch {
 		case readType == "full":
 			b, sz, stat = c.ReadBlockAtSpotFullTimestamp(CPARTSIZE)
 		case readType == "exact": 
-			b,sz,stat = c.ReadBlockAtSpot(CPARTSIZE) 
+			b,sz,stat = c.ReadBlockAtSpot(CPARTSIZE, true) 
+		default: 
+			panic("invalid read type")
 		}
 
 		x += sz
@@ -256,13 +335,30 @@ func (c *ConcurrentFileBlockReader) DeduceColumnTypes() {
 
 	wg.Wait()
 
-	c.blockMapCollector.Predict("threshold")
+	c.blockMapCollector.Predict("majority")
 	c.columnTypes = c.blockMapCollector.predictedTypes
 }
 
-/// TODO: add vector type to `TYPE_KEYS`
+func (c *ConcurrentFileBlockReader) AllColumnTypesKnown() bool {
+
+	for _, v := range c.columnTypes {
+		if v == "?" {
+			return false 
+		} 
+	}
+	return true 
+}
+
+func (c *ConcurrentFileBlockReader) GetColumnTypes() *BasicSet {
+	bs := OneBasicSet() 
+	for _, v := range c.columnTypes {
+		bs.AddOne(v) 
+	}
+	return bs
+}
+
 /*
-swap input's key-value ordering 
+outputs a map with key denoting data type, and value denoting the slice of indices belonging to that data type
 */ 
 func (c *ConcurrentFileBlockReader) ColumnTypeMapToTypeNotation() map[string][]int{
 
@@ -443,7 +539,7 @@ func (c *ConcurrentFileBlockReader) ConvertPartitionBlockToMatrix(blockIndex int
 
 	// TODO save below as struct var
 	q := c.ColumnTypeMapToTypeNotation()
-
+	
 	mfloat := c.blockData[blockIndex].FetchColumns(q["float"])
 	fl := c.IndicesToColumnLabels(q["float"])
 
@@ -462,7 +558,128 @@ func (c *ConcurrentFileBlockReader) ConvertPartitionBlockToMatrix(blockIndex int
 		intDataColumnLabels: il, stringData: mstring, stringDataColumnKeys: q["string"],
 		stringDataColumnLabels: sl, vectorData: mvec, vectorDataColumnKeys: q["vector"],
 		vectorDataColumnLabels: vl}
+}
+
+func (c *ConcurrentFileBlockReader) EncodeStringData(columnIndices []int, blockIndex int, ohc string) *mat.Dense {
+
+	mstring := c.blockData[blockIndex].FetchColumns(columnIndices)
+
+	if mstring == nil {
+		return nil 
+	}
+
+	if c.stringColumnEncodings == nil {
+		c.stringColumnEncodings = make(map[int]map[string]float64, 0) 
+	}
+
+	var x *mat.Dense 
+	switch {
+
+	case (ohc == "dumb"): 
+		x = OHEncodeBlock_Dumb_UsesPreviousEncoding(mstring, c.stringColumnEncodings) 
+
+	default: 
+		panic("! code the rest of the encoders !") 
+	}
+
+	return x 
+}
+
+/// 
+/*
+Converts partition block data to a float matrix.
+Matrix column order is identical to that of input data
+
+CAUTION: 
+	will only work if vector and undef data are null
+
+arguments: 
+- ohc : dumb| frequency | class
+*/ 
+func (c *ConcurrentFileBlockReader) ConvertPartitionBlockToRegularMatrix(blockIndex int, ohc string) *mat.Dense {
+
+	q := c.ColumnTypeMapToTypeNotation()
+
+	// throw error for invalid data 
+	if (len(q["undef"]) > 0) {
+		panic("undefined columns, cannot convert!") 
+	}
+
+	if (len(q["vector"]) > 0) {
+		panic("vector columns, cannot convert!") 
+	}  
+	 
+	// encode string data
+	x := c.EncodeStringData(q["string"], blockIndex, ohc) 	
+
+	// make into regular matrix
+	nr,nc := c.blockData[blockIndex].Dims() 
+	stringEncodeDataIndex := 0
+	output := mat.NewDense(nr,nc, nil)  
+
+	for i := 0; i < nc; i++ {
+		t := c.columnTypes[i]
+		var data []float64
+		switch {
+		case t == "int" || t == "float": 
+			data = DefaultStringSliceToFloat64Slice(c.blockData[blockIndex].GetAtCol(i)) 
+		case t == "string": 
+			data, _ = MatrixColToFloat64Slice(x, stringEncodeDataIndex)
+			stringEncodeDataIndex++
+		default: 
+			panic("[CFBR] invalid data type")
+		}
+
+		output.SetCol(i, data)
+	}
 	
+	return output
+}
+
+//// TODO: this needs to be checked!
+func (c *ConcurrentFileBlockReader) SetColumnsForRemoval(outputIndices []int, removeIndices []int) []int {
+	/// check arguments 
+	for _,r := range removeIndices {
+		if r >= len(c.columns) || r < 0 {
+			panic("invalid index to remove")
+		}
+	}
+	c.excludedColumnIndices = removeIndices
+		
+	// get new columns 
+	l := len(c.columns)
+	c.columns = StringSliceCollectByIndices(c.columns, c.excludedColumnIndices, true) 
+
+	// shift all columns
+	shifted:= make(map[int]int,0) // old index -> new index
+	for i := 0; i < l; i++ {
+		shifted[i] = i
+	}
+
+	for _,r := range removeIndices {
+		for i := r +1; i <l; i++ {
+			shifted[i]--
+		}
+	}
+
+	// calibrate output indices 
+	newOutput := make([]int,0)
+	for _, oi := range outputIndices {
+		newOutput = append(newOutput, shifted[oi])
+	}
+	
+	// calibrate col types map
+	newColTypes := make(map[int]string,0)
+	for k,v := range shifted {
+		if IntSInSlice(removeIndices, k) {
+			continue
+		}
+
+		newColTypes[v] = c.columnTypes[k]
+	}
+
+	c.columnTypes = newColTypes
+	return newOutput
 }
 
 /*

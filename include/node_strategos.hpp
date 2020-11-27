@@ -45,10 +45,11 @@ public:
     float growth;
 
     ///////// strings are labels for functions that instance uses
-    // growth-performance, growth-relative, number of contracts, number of contracts relative
+    // growth-performance, growth-relative, number of contracts, number of contracts relative, path score to max, path score to mean
     std::string competitionMeasure;
     // distance, transmission, distance+transmission, average distance, average transmission
     std::string contractMeasure;
+    // best paths risk, predicted worth
     std::string newContractMeasure;
     // path scores-promise, skipped nodes-promise
     std::string bondAdvantageMeasure;
@@ -108,7 +109,6 @@ public:
         normedG = ZeroDiv(greed, sum, 1.0);
     }
 
-
     void ClearFuturePlans() {
         futureNodePlans = std::vector<Plan*>();
     }
@@ -158,7 +158,7 @@ public:
         competitionMeasure = competitionFunction;
     };
 
-
+    void ChangeNodeNS(std::map<std::string, std::string> delta, std::string changeType); 
     void AddPlanToPriority(Plan* p);
     void AddPlans();
     void AddExecutedPlan(Plan* p);
@@ -175,7 +175,7 @@ public:
     Plan* MakeDiscoveryPlan(float planScore);
     void InsertFuturePlan(Plan* p, int verbose = 0);
     void DeleteActiveContract(int nodeId);
-    
+
     void DisplayVariables();
     void DisplayAllPlans();
 };

@@ -43,8 +43,6 @@ private:
     std::set<CommFlare*> processedCFlares;
 
     std::set<CommFlare*> finishedCFlares;
-
-    /// TODO: ?!? delete below  
     std::set<int> loggedPIDs; 
 
     // used to route flares
@@ -212,7 +210,7 @@ public:
 
         // to get best paths based on discovery
     bool PathExists(std::vector<int> path, int key);
-    void UpdateMaxPathLength(int pathLength);
+    void UpdateMaxPathLength();
     bool AddBetterPath(int key, std::vector<int> path,
         float score);
 

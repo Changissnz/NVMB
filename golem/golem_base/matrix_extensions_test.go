@@ -4,11 +4,6 @@ import (
 	"fmt"
 	"testing"
 	"gonum.org/v1/gonum/mat"
-	//"time"
-	//"reflect"
-	//"strconv"
-	//"encoding/csv"
-	//"io"
 )
 
 func Test_MatrixRowRange(t *testing.T) {

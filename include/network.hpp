@@ -8,8 +8,7 @@
 #include "nvmb_node.hpp"
 
 float AccumulateContractRisk(float risk, Contract* c);
-map<string,string> MakeRandomNodeNatureVariables();
-
+map<string,string> MakeRandomNodeNatureVariables(string mode);
 
 class Network
 {
@@ -21,7 +20,8 @@ public:
 
     map<int, NVMBNode*> contents;
     vector<int> deceased; 
-    bool mortality; 
+    bool mortality;
+    bool neighborsKnownAtStart;
 
     // these values are to be transmitted to Nodes for their own strategic analysis.
     map<string, float> edgeRisks; // key is edge, value is float
@@ -30,17 +30,21 @@ public:
     float averageContractTransmission;
     float averageContractPathLength;
 
+    map<int, map<string,string>> nodeNatureDeltas;
+    
+
     /// TODO: not yet coded.
     map<int,int> nodeTimestampDeaths; 
     int timestamp;
     int maximallyConnected;
 
-    Network(int i, bool m) {
+    Network(int i, bool m, bool nkas) {
         contents = map<int, NVMBNode*>(); 
         identifier = i;
         mortality = m; 
+        neighborsKnownAtStart = nkas; 
         timestamp = 0; 
-        maximallyConnected = 0; 
+        maximallyConnected = 0;
     }
 
     //////////// file network.cpp
@@ -59,9 +63,10 @@ public:
     void RunOneTimestamp(int verbose = 0);
     void Run(int verbose = 0, int numRounds = -1);
     void RunRandomNodeNatureVars(int verbose, int numRounds, float switchFrequency);
-    void UpdateNodeNaturesAtRandom(float freq); 
-    void UpdateNodeNatureAtRandom(int nodeId, float freq);
-    void PrerunProcess(); 
+    void RunRandomPatternStyleNodeNatureVars(int verbose, int numRounds, float switchFrequency, string randomNatureType, string updateType);
+    void UpdateNodeNaturesAtRandom(float freq, string randomNatureType, string updateType);
+    void UpdateNodeNatureAtRandom(int nodeId, float freq, string randomNatureType, string updateType);
+    void PrerunProcess();
     void ShutDown(); 
     void Reopen(); 
     void ActivitySummaryUpdate();
@@ -122,6 +127,10 @@ public:
     std::set<CommFlare*> RetrieveAllCFOfType(std::string cfType); 
     std::pair<std::vector<int>, bool> GetValidPathFromSourceToTarget(int sourceNode, int targetNode);
     bool IsPathValid(std::vector<int> path);
+
+    //////////// file: network_generation.hpp
+    void GenerateRandomNodeNatureDelta(std::string mode); 
+    static Network GenerateRandomNetwork(int nid, bool mortality, bool nkas, std::string folderPath, int numberOfNodes, float connectivity, std::string nodePrefix); 
 };
 
 #endif

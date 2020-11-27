@@ -57,56 +57,22 @@ TEST(TravelToBaseDirTest, AtBaseDir) {
   std::cout << "[AtBaseDir] go back to initial path:\t" << buff2 << std::endl;
 }
 
+/// TODO: incomplete
 TEST(InitializeFileTest, CreateNodeFileSuccess) {
-  NodeFileReader nfr("sample");// = new NodeFileReader("sample");
-
-  /*
-  nfr.InitializeFile();
-  vector<int> x = nfr.GetDelimiterPositions();
-  std::cout << "[CreateNodeFileSuccess] " << x.size() << endl;
-  for (int i =0; i < 5;i++) {
-    std::cout << "[CreateNodeFileSuccess] " << x[i] << endl;
-  }
-  */
+  NodeFileReader nfr("sample");
 }
 
-// TODO GetDelimiterPositions test here
-
+/// TODO: incomplete
 TEST(NodeFileReaderDeclareTest, FileExistence)
     {
-    NodeFileReader nfr("sample");// = new NodeFileReader("sample");
+    NodeFileReader nfr("sample");
 
     string str = "../../src/bank_history.cpp";
-    //string str = "network1.h";
-    //str = "gavn";
-    //str = "node_test.cpp";
-    //const char * c = str.c_str();
-
     cout << "THERE " << FileExists(str.c_str()) << endl;
 
     string fp = "../src/node_file_reader_test.cpp"; 
-    /*
-    char * fpc = fp.c_str(); 
-    ASSERT_EQ(1, FileExists(fpc));// FileExists(StringToCharArray(nfr.getFilePath())));
-    */ 
 
     char *cstr = new char[fp.length() + 1];
     strcpy(cstr, fp.c_str()); 
 
-    /*
-    cout << "HERE "
-    ASSERT_EQ(1, FileExists(fp.c_str()));// FileExists(StringToCharArray(nfr.getFilePath())));
-    */ 
-
-}
-
-
-/// TODO: merge this with above and make assertion 
-TEST(NodeFileReaderSpecTest, SpecCorrect) {
-    auto nfr = NodeFileReader("MARKOS", "nolo_1"); 
-
-    // data dir creation works 
-    // 
-    nfr.InitializeFile(); 
-    // ASSERT THE FILE EXISTS HERE 
 }

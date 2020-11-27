@@ -50,9 +50,10 @@ NVMBNode::NVMBNode(int id, string fn, map<string,string> m) {
     testModeSpec = ""; 
     manInput = false; 
     initialized = false;
+    timestamp = 0; 
     discoveryCost = 0;
     defaultResponseCF = make_pair(false,true);
-    neighborIdentifiers = set<int>(); 
+    neighborIdentifiers = set<int>();
 }
 
 NVMBNode::NVMBNode(int id, string dd, string fn, map<string,string> m) {
@@ -66,6 +67,7 @@ NVMBNode::NVMBNode(int id, string dd, string fn, map<string,string> m) {
     manInput = false; 
     initialized = false;
     discoveryCost = 0;
+    timestamp = 0; 
     defaultResponseCF = make_pair(false,true);
     neighborIdentifiers = set<int>(); 
 }

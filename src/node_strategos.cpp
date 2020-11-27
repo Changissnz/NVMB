@@ -26,7 +26,7 @@ NodeStrategos* NodeStrategos::MakeOne(map<string, string> userDefinedVariables) 
   float negotiation = 1.0;
   float growth = 1.0;
 
-  // default values are arbitrary
+  // default values a1re arbitrary
   string compMeasure = "path score to max"; //"growth-performance"; //
   string contMeasure = "distance";
   string ncontMeasure = "best paths risk";
@@ -73,6 +73,99 @@ NodeStrategos* NodeStrategos::MakeOne(map<string, string> userDefinedVariables) 
     contMeasure, ncontMeasure, bam, bdam);
   return s;
 };
+
+void NodeStrategos::ChangeNodeNS(map<string, string> delta, string changeType) {
+  //// TODO: chunk assumes not all attributes have keys
+  if (changeType != "reset" && changeType != "delta") {
+    throw invalid_argument("invalid change type"); 
+  }
+
+  float x; 
+  for (auto it = delta.begin(); it != delta.end(); it++) {
+    
+    if (it->first == "competition") {
+      x = stof(it->second); 
+      if (x < 0 || x > 1) {
+        throw invalid_argument("invalid value for competition");
+      }
+
+      if (changeType == "reset") {
+        competition = x;
+        continue; 
+      }
+
+      competition += x;
+
+      if (competition > 1) {
+        competition = competition - 1; 
+      }
+    } else if (it->first == "greed") {
+
+      x = stof(it->second); 
+      if (x < 0 || x > 1) {
+        throw invalid_argument("invalid value for greed");
+      }
+
+      if (changeType == "reset") {
+        greed = x;
+        continue; 
+      }
+
+      greed += x;
+      if (greed > 1) {
+        greed = greed - 1; 
+      }
+
+    } else if (it->first == "negotiation") {
+
+      x = stof(it->second); 
+      if (x < 0 || x > 1) {
+        throw invalid_argument("invalid value for negotiation");
+      }
+
+      if (changeType == "reset") {
+        negotiation = x;
+        continue; 
+      }
+
+      negotiation += x;
+
+      if (negotiation > 1) {
+        negotiation = negotiation - 1; 
+      }
+    } else if (it->first == "growth") {
+
+      x = stof(it->second); 
+      if (x < 0 || x > 1) {
+        throw invalid_argument("invalid value for growth");
+      }
+
+      if (changeType == "reset") {
+        growth = x;
+        continue; 
+      }
+
+      growth += x;
+      if (growth > 1) {
+        growth = growth - 1; 
+      } //////// strategy functions here, caution (no arg-check)
+    } else if (it->first == "competition-measure") {
+      competitionMeasure = it->second; 
+    } else if (it->first == "contract-measure") {
+      contractMeasure = it->second; 
+    } else if (it->first == "newContract-measure") {
+      newContractMeasure = it->second; 
+    } else if (it->first == "bondAdvantage-measure") {
+      bondAdvantageMeasure = it->second; 
+    } else if (it->first == "bondDeletionAdvantage-measure") {
+      bondDeletionAdvantageMeasure = it->second; 
+    } else {
+      throw invalid_argument("invalid key!");
+    }
+  }
+
+  CalculateNormedNatureVar(); 
+}; 
 
 /*
 // description
@@ -213,7 +306,6 @@ Plan* NodeStrategos::MakeBondPlan(string bondType, int referenceNode, int source
   return p;
 }
 
-///// TODO: below two methods are revised. 
 /*
 // description
 constructs a make-contract plan 
@@ -226,7 +318,6 @@ Plan* NodeStrategos::MakeContractPlan(int nodeId, int referenceNode, int otherNo
   return p;
 }
 
-  /// TODO: verify correctness. 
 /*
 // description 
 constructs a break-contract plan 
@@ -325,5 +416,4 @@ void NodeStrategos::DisplayAllPlans() {
   for (auto x: finishedPlans) {
     x->DisplayInfo();
   }
-
 }

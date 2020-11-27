@@ -5,7 +5,6 @@ using namespace std;
 /*
 for all neighbor identifiers of owned flares, update the nodes that hold them.
 */
-///
 void Network::AssignHeldDF(NVMBNode* n) {
     NodeProcessingUnit* npu = n->npu;
     set<DiscoveryFlare*> of = npu->GetOwnedFlares();
@@ -42,34 +41,31 @@ void Network::UpdateNodeDFOwned() {
   NVMBNode* n;
   NodeProcessingUnit* npu;
 
-  //#pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
-  //{
-    //#pragma omp for
+  #pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
+  {
+    #pragma omp for
     for (it = contents.begin(); it != contents.end(); it++) {
         n = it->second;
         npu = n->npu;
         npu->UpdateOwnedFlares();
-        ///cout << "UPDATE NODE DF " << it->first << endl; 
     };
-  //} 
+  } 
 }
 
 void Network::UpdateNodeDFNeighbors() {
     NVMBNode* n;
     NodeProcessingUnit* npu;
 
-    //#pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
-    //{
-    //    #pragma omp for
+    #pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
+    {
+        #pragma omp for
         for (map<int, NVMBNode*>::iterator it = contents.begin(); it != contents.end(); it++) {
-            ///cout << "Update node df " << it->first << endl; 
             n = it->second;
             npu = n->npu;
             npu->UpdateHeldFlares("location");
         };
-    //}
+    }
 }
-
 
 ////////////////// commerce flare functions
 
@@ -124,7 +120,6 @@ void Network::MoveCFlare(CommFlare* cf) {
   cf->initialized = true;
   bool moved = true;
   int source = cf->currentDestination;
-    ///cout << "source here:\t" << source << endl; 
   if (COMM_FLARE_INCREMENT == -1) {
     while (moved) {
       moved = IncrementCFlare(cf);
@@ -200,8 +195,7 @@ void Network::UpdateCFlare(CommFlare* cf, int nodeSource, int verbose) {
     if (!cf->finished) {
 
         cf->currentDestination = (prop->referenceNodes).second;
-    // update path to current destination
-        /// TODO: re-factor this chunk with below.
+        // update path to current destination
         if (contents[prevDest] != nullptr) {
             NodeProcessingUnit* npu = contents[prevDest]->npu;
             auto pathInfo = npu->GetPathForDestination(cf->currentDestination);
@@ -226,14 +220,12 @@ void Network::UpdateCFlare(CommFlare* cf, int nodeSource, int verbose) {
     }
 }
 
-// TODO : check the CommFlare variables `finished` and `valid`
 /*
 // description
 transfers possessive ownership of CommFlare from source to current destination.
 CAUTION : no error-checking enabled.
 */
 void Network::TransferCFlare(CommFlare* cf, int nodeSource) {
-
 
   // remove the comm flare from source held
     auto n = contents[nodeSource];
@@ -268,46 +260,37 @@ void Network::ProcessNodeCF(NVMBNode* n, int verbose) {
   
     int c = 0; 
     for (set<CommFlare*>::iterator it = heldCFlares.begin(); it != heldCFlares.end(); it++) {
-    // if comm flare has not yet been initialized, set its costs 
-    auto xx = (*it)->proposition; 
-    if ((*it)->proposition == nullptr) {
-        (*it)->MarkInvalid();
+      // if comm flare has not yet been initialized, set its costs 
+      auto xx = (*it)->proposition; 
+      if ((*it)->proposition == nullptr) {
+          (*it)->MarkInvalid();
+          continue; 
+      }
+
+      if (!(*it)->valid) {
+          cout << "NOT VALID" << endl; 
+          continue; 
+      }
+
+      if ((*it)->initialized == false) {
+        SetBondModCosts(*it);
+      }
+
+      // flares are in cached status
+      if (!(*it)->active) {
+        continue;
+      }
+
+      /// TODO: is this needed?
+      if (((*it)->finished) || !(*it)->valid) {
         continue; 
-    }
+      }
 
-    /// TODO:!!
-    if (!(*it)->valid) {
-        cout << "NOT VALID" << endl; 
-        continue; 
-    }
+      c++; 
 
-    if ((*it)->initialized == false) {
-      SetBondModCosts(*it);
-    }
-
-    /// TODO: 
-    /*
-    deleted pointer check here. 
-
-    test that held, owned, and processed cflares get cleared after 
-    every round. 
-    */
-
-    // flares are in cached status
-    if (!(*it)->active) {
-      continue;
-    }
-
-    ///+
-    if (((*it)->finished) || !(*it)->valid) {
-      continue; 
-    }
-
-    c++; 
-
-    // move CommFlare along path and make necessary changes to flare variable
-    MoveCFlare(*it);
-    UpdateCFlare(*it, n->GetId(), verbose);
+      // move CommFlare along path and make necessary changes to flare variable
+      MoveCFlare(*it);
+      UpdateCFlare(*it, n->GetId(), verbose);
   }
 }
 
@@ -363,11 +346,11 @@ float Network::IncrementNodeBankByCF(CommFlare *cf) {
     BankUnit* bu = n->GetBank();
     bu->LogTimestampUnit(tsu); 
     bu->UpdateCurrency(tsu->impact); 
-
     return taxCost;
 }
 
-
+/*
+*/
 void Network::UpdateCompleteCFlares() {
     NodeProcessingUnit* npu; 
     for (auto x: contents) {        
@@ -400,32 +383,29 @@ void Network::MisrouteUpdate(CommFlare* cf, int nodeSource) {
 
 /*
 // description
-
 */
-/// TODO: ! logResp needs to be set to True
 void Network::ProcessNodeCFAll_(bool logResp, int verbose) {
   // get the max number of neighbors
-  /// TODO: check for actual contents size (after node deletion)
     SetMaxConnectivity();
     NVMBNode* n;
 
     // process held cf
-    //#pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
-    //{
-    //    #pragma omp for 
+    #pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
+    {
+        #pragma omp for 
         for (map<int,NVMBNode*>::iterator it = contents.begin(); it != contents.end(); it++) {
             n = it->second;
             ProcessNodeCF(n, verbose);
         };
-    //}
+    }
 
 
     SetHeldCFToActive();
 
     // process each node's response
-    //#pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
-    //{
-    //    #pragma omp for 
+    #pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
+    {
+        #pragma omp for 
 
         for (map<int,NVMBNode*>::iterator it = contents.begin(); it != contents.end(); it++) {
             n = it->second;
@@ -434,12 +414,12 @@ void Network::ProcessNodeCFAll_(bool logResp, int verbose) {
 
             }
         };
-    //}
+    }
 
     // execute responses
-    //#pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
-    //{
-    //    #pragma omp for 
+    #pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
+    {
+        #pragma omp for 
 
         for (map<int,NVMBNode*>::iterator it = contents.begin(); it != contents.end(); it++) {
             n = it->second;
@@ -448,8 +428,7 @@ void Network::ProcessNodeCFAll_(bool logResp, int verbose) {
                 ProcessNodeCFResponses(n->npu);
             }
         };
-    //}   
-
+    }   
 }
 
 /*
@@ -485,17 +464,17 @@ void Network::MarkExecutedPlansAsFinished() {
         auto npu = (it->second)->npu;
         scf = npu->GetProcessedCFlares();
         for (auto cf: scf) {
-        // flare is finished
-        if (cf->finished) {
-            // check if node owner exists
-            if (!NodeExists(cf->nodeOwnerIdentifier)) {
-            continue;
-            }
+          // flare is finished
+          if (cf->finished) {
+              // check if node owner exists
+              if (!NodeExists(cf->nodeOwnerIdentifier)) {
+              continue;
+              }
 
-            // find executed plan (node owner) corresponding to cflare and mark it as finished
-            auto strat = (contents[cf->nodeOwnerIdentifier])->GetStrategy();
-            strat->FinishExecutedPlan("plan", cf->planIdentifier);
-        }
+              // find executed plan (node owner) corresponding to cflare and mark it as finished
+              auto strat = (contents[cf->nodeOwnerIdentifier])->GetStrategy();
+              strat->FinishExecutedPlan("plan", cf->planIdentifier);
+          }
         }
     }
 }
@@ -535,7 +514,7 @@ void Network::ModifyNetworkByCFBond(CommFlare* cf) {
   }
 }
 
-/// TODO : untested
+/// TODO: untested
 /*
 // description
 */
@@ -580,16 +559,16 @@ bool Network::SetBondModCosts(CommFlare *cf) {
         return false; 
     }
 
-  // set up costs map
-  Proposition* prop = cf->proposition;
-    if (prop == nullptr) { 
-        cout << "warning: could not activate null CF" << endl; 
-        return false; 
-    }
+    // set up costs map
+    Proposition* prop = cf->proposition;
+      if (prop == nullptr) { 
+          cout << "warning: could not activate null CF" << endl; 
+          return false; 
+      }
 
-  cf->costs[prop->proposerNode] = 0;
-  cf->costs[prop->referenceNodes.first] = 0;
-  cf->costs[prop->referenceNodes.second] = 0;
+    cf->costs[prop->proposerNode] = 0;
+    cf->costs[prop->referenceNodes.first] = 0;
+    cf->costs[prop->referenceNodes.second] = 0;
 
     bool stat = true; 
     if (contents[prop->proposerNode] != nullptr && contents.find(prop->proposerNode) != contents.end()) {
@@ -603,27 +582,26 @@ bool Network::SetBondModCosts(CommFlare *cf) {
     }
     
   // calculate cost 2:
-  if (contents[prop->referenceNodes.first] != nullptr && contents.find(prop->referenceNodes.first) != contents.end()) {
-    float nr2 = contents[prop->referenceNodes.first]->GetNodeRank();
-    float curr2 = (contents[prop->referenceNodes.first])->GetWorth();
-    float bondModCost2 = BondModificationCost2(nr2, contents[prop->referenceNodes.first]->GetNumberOfNeighbors(), contents.size(), curr2);
-    cf->costs[prop->referenceNodes.first] += bondModCost2;
-  } else {
-        stat = false; 
+    if (contents[prop->referenceNodes.first] != nullptr && contents.find(prop->referenceNodes.first) != contents.end()) {
+      float nr2 = contents[prop->referenceNodes.first]->GetNodeRank();
+      float curr2 = (contents[prop->referenceNodes.first])->GetWorth();
+      float bondModCost2 = BondModificationCost2(nr2, contents[prop->referenceNodes.first]->GetNumberOfNeighbors(), contents.size(), curr2);
+      cf->costs[prop->referenceNodes.first] += bondModCost2;
+    } else {
+      stat = false; 
     }
 
   // calculate cost 3
-  if (contents[prop->referenceNodes.second] != nullptr && contents.find(prop->referenceNodes.second) != contents.end()) {
-    float nr3 = contents[prop->referenceNodes.second]->GetNodeRank();
-    float curr3 = (contents[prop->referenceNodes.second])->GetWorth();
-    float bondModCost3 = BondModificationCost2(nr3, contents[prop->referenceNodes.second]->GetNumberOfNeighbors(), contents.size(), curr3);
-    cf->costs[prop->referenceNodes.second] += bondModCost3;
-  } else {
-        stat = false; 
+    if (contents[prop->referenceNodes.second] != nullptr && contents.find(prop->referenceNodes.second) != contents.end()) {
+      float nr3 = contents[prop->referenceNodes.second]->GetNodeRank();
+      float curr3 = (contents[prop->referenceNodes.second])->GetWorth();
+      float bondModCost3 = BondModificationCost2(nr3, contents[prop->referenceNodes.second]->GetNumberOfNeighbors(), contents.size(), curr3);
+      cf->costs[prop->referenceNodes.second] += bondModCost3;
+    } else {
+      stat = false; 
     }
 
-
-  return stat;
+    return stat;
 }
 
 void Network::DisplayExistingContracts() {
@@ -639,15 +617,14 @@ void Network::DisplayExistingContracts() {
 Performs activities for all active contracts. 
 */ 
 void Network::ActiveContractExecution() {
-    //
-    for (auto x: contents) {
-        auto strategy = x.second->GetStrategy(); 
-        auto contracts = strategy->activeContracts; 
-        for (auto y: strategy->activeContracts) {
-            ConductContract(y, x.first); 
-        }
-    } 
-
+  //
+  for (auto x: contents) {
+      auto strategy = x.second->GetStrategy(); 
+      auto contracts = strategy->activeContracts;
+      for (auto y: strategy->activeContracts) {
+          ConductContract(y, x.first); 
+      }
+  } 
 }
 
 /*
@@ -681,7 +658,8 @@ bool Network::ConductContract(Contract* C, int nodeSource) {
             break; 
         } else if (nullEdge.first.first == -1 && !nullEdge.second) {
             continue; 
-        } else {/// TODO: fail, have to update Node's missing edge  
+        } else {
+            /// TODO: fail, have to update Node's missing edge  
             nullEdges.push_back(nullEdge.first); 
             npuX->RemoveRecordsOfEdge(NodePairToString(nullEdge.first.first, nullEdge.first.second));  
         } 
@@ -699,7 +677,6 @@ bool Network::ConductContract(Contract* C, int nodeSource) {
         bu->LogTimestampUnit(tsu); 
         bu->UpdateCurrency(tsu->impact); 
     }
-
 
     /// CHECK: transmission
     contents[nodeSource]->IncrementTransmission(success); 
@@ -755,7 +732,6 @@ pair<pair<int,int>, bool> Network::RouteContract(Contract* C, vector<int> path, 
 
     // route along the last edge
     bool success = true; /// TODO: check this 
-
     TimestampUnit* tsu; 
 
     if (!EdgeExists(path[i], path[i + 1], false)) {

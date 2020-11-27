@@ -10,9 +10,6 @@ import (
 	"testing"
 	"time"
 	"reflect"
-	//"strconv"
-	//"encoding/csv"
-	//"io"
 )
 
 const TEST_FP string = "./datos/defaultx"
@@ -43,10 +40,11 @@ Tests the method <ConcurrentFileBlockReader.ReadBlockAtSpot>
 */ 
 func Test_ConcurrentFileBlockReader_ReadBlockAtSpot(t *testing.T) {
 	///// case 1 
+	GenerateFileDefault() 
 	fp := "./datos/default"
 	x := OneConcurrentFileBlockReader(fp)
 
-	b, sz, stat := x.ReadBlockAtSpot(3)
+	b, sz, stat := x.ReadBlockAtSpot(3,true)
 
 	if stat {
 		panic("file not done")
@@ -66,15 +64,15 @@ func Test_ConcurrentFileBlockReader_ReadBlockAtSpot(t *testing.T) {
 	x2 := OneConcurrentFileBlockReader(TESTFP_1)	
 	c := 0 
 	for {
-		_, _, stat := x2.ReadBlockAtSpot(3)
+		_, _, stat := x2.ReadBlockAtSpot(3,true)
 		c++ 
 		if stat {
 			break 
 		}
 	}
 
-	if c != 11 {
-		panic(fmt.Sprintf("invalid number of blocks read %d, want 11", c))
+	if c != 117 {
+		panic(fmt.Sprintf("invalid number of blocks read %d, want 117", c))
 	}
 }
 
@@ -140,12 +138,6 @@ func Test_ChooseRandomRowDataIndices(t *testing.T) {
 	if x.oi.Len() != 20 {
 		panic("Error getting random row indices")
 	}
-
-	/// uncomment below to display random variables
-	/*
-		fmt.Println("** random indices **")
-		x.oi.PrintOut()
-	*/
 }
 
 func Test_ConcurrentFileBlockReader_Read2DeduceOneRowDataIndex(t *testing.T) { //index []int) string {
@@ -167,21 +159,6 @@ func Test_ConcurrentFileBlockReader_Read2DeduceOneRowDataIndex(t *testing.T) { /
 			panic(fmt.Sprintf("invaid type deduction for %d of test case 1", k))
 		}
 	}
-
-	/// CASE 2: FLAWED_FP
-	/// TODO : make assertion here
-	FLAWED_FP := "./datos/default3"
-	x = OneConcurrentFileBlockReader(FLAWED_FP)
-	x.ReadPartition("exact")
-
-	x.blockMapCollector = OneMapCollector()
-	x.Read2DeduceOneRowDataIndex(i1, true)
-	x.Read2DeduceOneRowDataIndex(i2, true)
-
-	fmt.Println("DATOS")
-	fmt.Println()
-	fmt.Println(x.blockMapCollector.datos)
-	fmt.Println()
 }
 
 /*
@@ -247,7 +224,7 @@ func Test_ConcurrentFileBlockReader__MapCollect__PredictKeyOfTypeByRequiredThres
 	
 	// check default3 by minimum threshold 
 	for k,_ := range x.blockMapCollector.datos {
-		q := x.blockMapCollector.PredictKeyOfTypeByRequiredThreshold(k, 0.001)
+		q := x.blockMapCollector.PredictKeyOfTypeByMode("threshold", k, 0.001)
 		if q != answers[k] {
 			panic(fmt.Sprintf("[1.0] wrong prediction %s for index %d, want %s", q, k, answers[k]))
 		}
@@ -255,7 +232,7 @@ func Test_ConcurrentFileBlockReader__MapCollect__PredictKeyOfTypeByRequiredThres
 
 	// check default3 by DEFAULT_DOMINANCE_RATIO
 	for k,_ := range x.blockMapCollector.datos {
-		q := x.blockMapCollector.PredictKeyOfTypeByRequiredThreshold(k, DEFAULT_DOMINANCE_RATIO)
+		q := x.blockMapCollector.PredictKeyOfTypeByMode("threshold", k, DEFAULT_DOMINANCE_RATIO)
 		if q != "?" {
 			panic(fmt.Sprintf("[1.1] wrong prediction %s for index %d, want %s", q, k, answers[k]))
 		}
@@ -265,13 +242,120 @@ func Test_ConcurrentFileBlockReader__MapCollect__PredictKeyOfTypeByRequiredThres
 // TODO: incomplete test
 func Test_ConcurrentFileBlockReader_ConvertPartitionBlockToMatrix(t *testing.T) {
 
-
 	fmt.Println("** ConvertPartitionBlockToMatrix **")
-	fp3 := "./datos/default3"
+	fp3 := "./datos/default"
 	x := OneConcurrentFileBlockReader(fp3) 
 	x.ReadPartition("exact") 
+	x.DeduceColumnTypes()
 	
+	q := x.ColumnTypeMapToTypeNotation()
+	x.blockData[0].FetchColumns(q["float"]) //?
+	x.ConvertPartitionBlockToMatrix(0)
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+func Test_ConcurrentFileBlockReader__DeduceColumnTypes__DataIsCreditCard(t *testing.T) {
+
+	// case 1: 
+	fp3 := "./datos/default3"
+	x1 := OneConcurrentFileBlockReader(fp3) 
+
 	fmt.Println("trial")
+	x1.DeduceColumnTypes()
+	fmt.Println("column types for: default3")
+	fmt.Println(x1.columnTypes)
+	fmt.Println(reflect.TypeOf(x1))
+
+	// case 2: credit card dataset  
+	fp := "./datos/other_data/creditcard.csv" 
+	x := OneConcurrentFileBlockReader(fp)
+
 	x.DeduceColumnTypes() 
-	fmt.Println(reflect.TypeOf(x))
+	
+	answers := map[int]string{0:"int", 1:"float", 2:"float", 3:"float", 4:"float",
+	 5:"float", 6:"float", 7:"float", 8:"float", 9:"float",
+	 10:"float", 11:"float", 12:"float", 13:"float", 14:"float",
+	 15:"float", 16:"float", 17:"float", 18:"float", 19:"float",
+	 20:"float", 21:"float", 22:"float", 23:"float", 24:"float",
+	 25:"float", 26:"float", 27:"float", 28:"float", 29:"float", 30:"int"}
+
+	 for k, v := range answers {
+		if v != x.columnTypes[k] {
+			panic(fmt.Sprintf("incorrect variable value for %d, want %s got %s", k, v, x.columnTypes[k]))
+		}		
+	}
+} 
+
+/*
+*/ 
+func Test_ConcurrentFileBlockReader_ReadPartition__DeletedRow__DataIsCreditCard(t *testing.T) {
+
+	fp := "./datos/other_data/creditcard.csv" 
+	x1 := OneConcurrentFileBlockReader(fp) 
+	x1.DeduceColumnTypes()
+
+	// remove columns here
+	x1.SetColumnsForRemoval([]int{}, []int{0, 3, 5}) 
+	answer := map[int]string{
+		0 :  "float",
+		1 :  "float",
+		2 :  "float",
+		3 :  "float",
+		4 :  "float",
+		5 :  "float",
+		6 :  "float",
+		7 :  "float",
+		8 :  "float",
+		9 :  "float",
+		10 :  "float",
+		11 :  "float",
+		12 :  "float",
+		13 :  "float",
+		14 :  "float",
+		15 :  "float",
+		16 :  "float",
+		17 :  "float",
+		18 :  "float",
+		19 :  "float",
+		20 :  "float",
+		21 :  "float",
+		22 :  "float",
+		23 :  "float",
+		24 :  "float",
+		25 :  "float",
+		26 :  "float",
+		27 :  "int"}
+
+	for k,v := range x1.columnTypes {
+		
+		if v != answer[k] {
+			panic(fmt.Sprintf("incorrect value for key %d", k))
+		}
+	}
+
+	/// test reading one partition
+	x1.ReadPartition("exact") 
+	_,c := x1.blockData[0].Dims()
+
+	if c != len(x1.columnTypes) {
+		panic("partition number of columns incorrect!") 
+	}
+
+}
+
+/*
+check to see that null values such as ' ', NaN, null, etc. are registered appropriated in matrix
+representation of data. 
+
+This method will be the starting point to converting nvmb initial output data to readable
+matrix data for training. 
+*/ 
+func Test_ConcurrentFileBlockReader__DataIsNode0(t *testing.T) {
+	fp := "./datos/node_data/node_1" 
+	x1 := OneConcurrentFileBlockReader(fp) 
+	x1.DeduceColumnTypes()
+
+	fmt.Println("predicted column types") 
+	fmt.Println(x1.columnTypes)
 }

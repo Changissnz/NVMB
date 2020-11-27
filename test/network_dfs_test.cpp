@@ -2,11 +2,12 @@
 #include <gtest/gtest.h>
 #include<vector>
 
+//X
 /*
 test does not account for bank
 */
 TEST(BaseNetworkDeclarationTest, BaseNetworkDeclared) {
-  Network N(1, false);
+  Network N(1, false, false);
 
   N.AddNode(1);
   N.AddNode(2);
@@ -15,6 +16,7 @@ TEST(BaseNetworkDeclarationTest, BaseNetworkDeclared) {
   ASSERT_EQ(N.Size(), 2);
 }
 
+//X
 /*
 runs two `processDF` on Node 5 and checks for held flares
 */
@@ -50,6 +52,7 @@ TEST(NetworkNPUProcess1DF, NPUProcessGood) {
   ASSERT_EQ(npu->GetHeldFlares().size(), 1); // node 8
 }
 
+//X
 /*
 // description
 tests for 1 timestamp on active node 5. Results should include a
@@ -84,7 +87,7 @@ TEST(NetworkRunOneTimestamp, NetworkRunOneTimestampCorrect) {
     cout << "plan cache:\t" << (*it2)->planType << "\t" << (*it2)->score << endl;
     cout << "\t" << "plan info:\t" << (*it2)->sourceNodeIdentifier << "\t" << (*it2)->targetNodeIdentifier << endl;
   }
-  */
+  */ 
   //-----------------------------------------------------------
   ASSERT_EQ(plansInExecution.size(), 1);
   ASSERT_EQ(plansInExecution[0]->planType, "discovery");
@@ -93,7 +96,7 @@ TEST(NetworkRunOneTimestamp, NetworkRunOneTimestampCorrect) {
   return;
 }
 
-
+//X
 /*
 // description
 runs a Discovery Process on Node 5 and checks for correct end variables,
@@ -105,9 +108,13 @@ TEST(NetworkDiscoveryProcessNode5, NetworkDiscoveryProcessNode5Correct) {
     vector<int> x = vector<int>{0,1,2,3,4,6,7,8,9};
     Network N = Network1WithNodesInSelfMode(x);
     NodeProcessingUnit* npu = N.contents[5]->npu;
+    /*
+    for (auto c: N.contents) {
+      cout << "node " << c.first << " " << (c.second->npu)->discoveryType << endl; 
+    }
+    */ 
 
     cout << "[0] CURRENT TIME " << N.timestamp << "\t" << N.contents[5]->GetTimestamp() << endl;
-
     N.RunOneTimestamp();
     cout << "[1] CURRENT TIME " << N.timestamp << "\t" << N.contents[5]->GetTimestamp() << endl;
 
@@ -138,7 +145,8 @@ TEST(NetworkDiscoveryProcessNode5, NetworkDiscoveryProcessNode5Correct) {
     ASSERT_EQ(strategy->GetFinishedPlans().size(), 1);
 
     // check for correct max path length
-    ASSERT_EQ(npu->maxPathLength, 8);
+    npu->UpdateMaxPathLength(); 
+    ASSERT_EQ(npu->maxPathLength, 5);
 
     // check for correct shortest path distances
     auto spl = npu->GetBestPaths();
@@ -153,28 +161,9 @@ TEST(NetworkDiscoveryProcessNode5, NetworkDiscoveryProcessNode5Correct) {
     ASSERT_EQ(spl[7][0].first.size() - 1, 3);
     ASSERT_EQ(spl[8][0].first.size() - 1, 1);
     ASSERT_EQ(spl[9][0].first.size() - 1, 2);
-
-
-    ///// UNCOMMENT BELOW FOR DETAILS 
-    /*
-    cout << "CURRENT TIME " << N.timestamp << "\t" << N.contents[5]->GetTimestamp() << endl;
-
-    auto tsuh = (N.contents[5]->GetBank())->GetTimestampUnitHistory();
-
-    for (auto s: tsuh) {
-        cout << "TIMETH " << s.first << endl; 
-
-        for (auto ss: s.second) {
-            ss->DisplayInfo(); 
-        }
-
-        cout << "\n\n\n" << endl; 
-
-    }
-    N.contents[5]->WriteOutToFile(false); 
-    */ 
 }
 
+//X
 /*
 // description
 tests for no error when running two activities on active node 5, which involves
@@ -218,26 +207,17 @@ TEST(NetworkNode5MoveInitial, NetworkNode5MoveInitialCorrect) {
 
     vector<Plan*> rx1 = strategy->GetPlansInExecution(); 
 
-    cout << "[1] DA PLANZ" << endl; 
+    cout << "[1] plans" << endl; 
     for (auto y: rx1) {
         y->DisplayInfo(); 
     }
 
     N.RunOneTimestamp();
-
-    /*
-    cout << "---------------------" << endl;
-    cout << "AFTER" << endl; 
-    cout << "plan cache size:\t" << strategy->GetPlansInCache().size() << endl;
-    cout << "plan execution size:\t" << strategy->GetPlansInExecution().size() << endl;
-    cout << "finished plan size:\t" << strategy->GetFinishedPlans().size() << endl;
-    */ 
     
     /// TODO: check below assertions; changed from 2,0 to 1,1 
-
     vector<Plan*> rx = strategy->GetPlansInExecution(); 
 
-    cout << "[2] DA PLANZ" << endl; 
+    cout << "[2] plans" << endl; 
     for (auto y: rx) {
         y->DisplayInfo(); 
     }
@@ -247,6 +227,7 @@ TEST(NetworkNode5MoveInitial, NetworkNode5MoveInitialCorrect) {
     ASSERT_EQ(strategy->discoveryOn, false);
 }
 
+//X
 /*
 // description
 tests DFS process on all nodes
@@ -278,3 +259,7 @@ TEST(NetworkAllNodesDFS, NetworkAllNodesDFS_Correct) {
   */
 }
 
+/// TODO:
+TEST(Network_DFSOnNode5_EdgeRisksUpdateEachTimestamp, EdgeRisksUpdateCorrect) {
+
+}

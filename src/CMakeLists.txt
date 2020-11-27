@@ -1,6 +1,5 @@
 project(NVMB LANGUAGES CXX)
 
-
 # TODO: make omp package required 
 find_package(OpenMP)
 if(OPENMP_FOUND)

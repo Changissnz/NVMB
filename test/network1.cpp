@@ -13,7 +13,7 @@ void PrintSpacer() {
 
 Network Network1() {
 
-  Network N(1, false);
+  Network N(1, false, false);
 
   // declare the nodes
   NVMBNode* n0 = new NVMBNode(0, "node_0");
@@ -77,7 +77,7 @@ Network Network1() {
 }
 
 Network Network2() {
-  Network N(1, false);
+  Network N(1, false, false);
 
   // declare the nodes
   NVMBNode* n0 = new NVMBNode(0, "node_0");
@@ -128,60 +128,60 @@ Network Network2() {
 
 Network Network3(string folderName) {
 
-    Network N(1, false); 
+    Network N(1, false, false); 
 
-    NVMBNode* n0 = new NVMBNode(0, folderName, "node_0", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n0 = new NVMBNode(0, folderName, "node_0", MakeRandomNodeNatureVariables("each")); 
     n0->AddNeighbor(1);
     n0->AddNeighbor(5);
     N.AddNode(n0);
 
-    NVMBNode* n1 = new NVMBNode(1, folderName, "node_1", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n1 = new NVMBNode(1, folderName, "node_1", MakeRandomNodeNatureVariables("each")); 
     n1->AddNeighbor(0);
     n1->AddNeighbor(2);
     n1->AddNeighbor(7);
     N.AddNode(n1);
 
-    NVMBNode* n2 = new NVMBNode(2, folderName, "node_2", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n2 = new NVMBNode(2, folderName, "node_2", MakeRandomNodeNatureVariables("each")); 
     n2->AddNeighbor(1);
     n2->AddNeighbor(3);
     n2->AddNeighbor(7);
     N.AddNode(n2);
 
-    NVMBNode* n3 = new NVMBNode(3, folderName, "node_3", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n3 = new NVMBNode(3, folderName, "node_3", MakeRandomNodeNatureVariables("each")); 
     n3->AddNeighbor(2);
     n3->AddNeighbor(4);
     n3->AddNeighbor(8);
     N.AddNode(n3);
 
-    NVMBNode* n4 = new NVMBNode(4, folderName, "node_4", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n4 = new NVMBNode(4, folderName, "node_4", MakeRandomNodeNatureVariables("each")); 
     n4->AddNeighbor(3);
     n4->AddNeighbor(6);
     n4->AddNeighbor(9);
     N.AddNode(n4);
 
-    NVMBNode* n5 = new NVMBNode(5, folderName, "node_5", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n5 = new NVMBNode(5, folderName, "node_5", MakeRandomNodeNatureVariables("each")); 
     n5->AddNeighbor(0);
     n5->AddNeighbor(6);
     n5->AddNeighbor(8);
     N.AddNode(n5);
 
-    NVMBNode* n6 = new NVMBNode(6, folderName, "node_6", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n6 = new NVMBNode(6, folderName, "node_6", MakeRandomNodeNatureVariables("each")); 
     n6->AddNeighbor(4);
     n6->AddNeighbor(5);
     N.AddNode(n6);
 
-    NVMBNode* n7 = new NVMBNode(7, folderName, "node_7", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n7 = new NVMBNode(7, folderName, "node_7", MakeRandomNodeNatureVariables("each")); 
     n7->AddNeighbor(1);
     n7->AddNeighbor(2);
     N.AddNode(n7);
 
-    NVMBNode* n8 = new NVMBNode(8, folderName, "node_8", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n8 = new NVMBNode(8, folderName, "node_8", MakeRandomNodeNatureVariables("each")); 
     n8->AddNeighbor(3);
     n8->AddNeighbor(5);
     n8->AddNeighbor(9);
     N.AddNode(n8);
 
-    NVMBNode* n9 = new NVMBNode(9, folderName, "node_9", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n9 = new NVMBNode(9, folderName, "node_9", MakeRandomNodeNatureVariables("each")); 
     n9->AddNeighbor(4);
     n9->AddNeighbor(8);
     N.AddNode(n9);
@@ -190,37 +190,37 @@ Network Network3(string folderName) {
 }
 
 Network Network4(string folderName, bool mortality) {
-    Network N(4, mortality); 
+    Network N(4, mortality, false); 
 
-    NVMBNode* n0 = new NVMBNode(0, folderName, "node_0", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n0 = new NVMBNode(0, folderName, "node_0", MakeRandomNodeNatureVariables("each")); 
     n0->AddNeighbor(1);
     n0->AddNeighbor(3);
     N.AddNode(n0);
 
-    NVMBNode* n1 = new NVMBNode(1, folderName, "node_1", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n1 = new NVMBNode(1, folderName, "node_1", MakeRandomNodeNatureVariables("each")); 
     n1->AddNeighbor(0);
     n1->AddNeighbor(2);
     N.AddNode(n1);
 
-    NVMBNode* n2 = new NVMBNode(2, folderName, "node_2", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n2 = new NVMBNode(2, folderName, "node_2", MakeRandomNodeNatureVariables("each")); 
     n2->AddNeighbor(1);
     n2->AddNeighbor(3);
     n2->AddNeighbor(5); 
     N.AddNode(n2);
 
-    NVMBNode* n3 = new NVMBNode(3, folderName, "node_3", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n3 = new NVMBNode(3, folderName, "node_3", MakeRandomNodeNatureVariables("each")); 
     n3->AddNeighbor(0);
     n3->AddNeighbor(2);
     n3->AddNeighbor(4); 
     n3->AddNeighbor(5); 
     N.AddNode(n3);
 
-    NVMBNode* n4 = new NVMBNode(4, folderName, "node_4", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n4 = new NVMBNode(4, folderName, "node_4", MakeRandomNodeNatureVariables("each")); 
     n4->AddNeighbor(3);
     n4->AddNeighbor(5); 
     N.AddNode(n4); 
 
-    NVMBNode* n5 = new NVMBNode(5, folderName, "node_5", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n5 = new NVMBNode(5, folderName, "node_5", MakeRandomNodeNatureVariables("each")); 
     n5->AddNeighbor(2);
     n5->AddNeighbor(4); 
     N.AddNode(n5);  
@@ -230,39 +230,40 @@ Network Network4(string folderName, bool mortality) {
 
 
 Network Network6(string folderName, bool mortality) {
-    Network N(6, mortality); 
+    Network N(6, mortality, false); 
 
-    NVMBNode* n0 = new NVMBNode(0, folderName, "node_0", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n0 = new NVMBNode(0, folderName, "node_0", MakeRandomNodeNatureVariables("each")); 
     n0->AddNeighbor(1);
     N.AddNode(n0);
 
-    NVMBNode* n1 = new NVMBNode(1, folderName, "node_1", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n1 = new NVMBNode(1, folderName, "node_1", MakeRandomNodeNatureVariables("each")); 
     n1->AddNeighbor(0);
     n1->AddNeighbor(2);
     N.AddNode(n1);
 
-    NVMBNode* n2 = new NVMBNode(2, folderName, "node_2", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n2 = new NVMBNode(2, folderName, "node_2", MakeRandomNodeNatureVariables("each")); 
     n2->AddNeighbor(1);
     n2->AddNeighbor(3); 
     N.AddNode(n2);
 
-    NVMBNode* n3 = new NVMBNode(3, folderName, "node_3", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n3 = new NVMBNode(3, folderName, "node_3", MakeRandomNodeNatureVariables("each")); 
     n3->AddNeighbor(2);
     n3->AddNeighbor(4); 
     N.AddNode(n3);
 
-    NVMBNode* n4 = new NVMBNode(4, folderName, "node_4", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n4 = new NVMBNode(4, folderName, "node_4", MakeRandomNodeNatureVariables("each")); 
     n4->AddNeighbor(3);
     n4->AddNeighbor(5); 
     N.AddNode(n4); 
 
-    NVMBNode* n5 = new NVMBNode(5, folderName, "node_5", MakeRandomNodeNatureVariables()); 
+    NVMBNode* n5 = new NVMBNode(5, folderName, "node_5", MakeRandomNodeNatureVariables("each")); 
     n5->AddNeighbor(4); 
     N.AddNode(n5);  
 
     return N; 
 }
 
+/// TODO: delete
 Network Network1WithNodesInSelfMode(vector<int> x) {
   Network N = Network1();
 
@@ -362,7 +363,6 @@ void RunNetworkDFSProcessOnActiveNodes(Network* N) {
     }
 }
 
-
 /*
 TODO delete this.
 */
@@ -413,11 +413,9 @@ void DisplayNodePlansInfo(Network N, int nodeId) {
     (*it3)->DisplayInfo();
     cout << endl;
   }
-
 }
 
 /*
-
 */ 
 void DisplayNetworkTimestampUnits(Network N) {
   cout << "TIMESTAMP DATA FOR NETWORK OF TEST" << endl; 
@@ -446,8 +444,6 @@ Makes a direct contract plan for node's default execution.
 */ 
 void MakeContractPlanDefaultForNode(NVMBNode* n, int receiverNode) {
       NodeStrategos* ns = n->GetStrategy(); 
-      /// TODO: delete when done. 
-      // Plan* MakeContractPlan(int nodeId, int referenceNode, int otherNode, float planScore);
       Plan* p = ns->MakeContractPlan(n->GetId(), n->GetId(), receiverNode, 1.0); 
       ns->InsertDefaultPlan(p); 
 }
@@ -487,7 +483,7 @@ void BreakContractPlanDefaultForNode(NVMBNode* n , int contractedNode) {
 
 
 
-/// TODO: code for all playTypes 
+/// TODO: code for all planTypes 
 /*
 */  
 void LoadPlanForNodeN(Network N, int n, string planType) {
@@ -519,8 +515,6 @@ void LoadPlanForNodeN(Network N, int n, string planType) {
   } else {
 
   }
-
-
 }
 
 bool IsNetworkDiscoveryOff(Network N) {

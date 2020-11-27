@@ -67,15 +67,12 @@ bool NVMBNode::ConsiderCompetitor(int i) {
   return InterpretCompetitionMeasure(output, strategy->competition);
 }
 
-// TODO : not all relevant methods have been coded. See file `new_contract_functions.hpp`
+/// TODO: not all relevant methods have been coded. See file `new_contract_functions.hpp`
 /*
 // description
 method
 */
 float NVMBNode::ConsiderNewContract(int newNode) {
-
-  /// TODO: 
-  //cout << "CONSIDERING NEW CONTRACT" << endl; 
   NodeStrategos* strategy = npu->GetStrategy();
   if (strategy->newContractMeasure == "best paths risk") {
     auto pathsToDestination = npu->BestPathRiskInfoForNewContract(newNode);
@@ -88,8 +85,6 @@ float NVMBNode::ConsiderNewContract(int newNode) {
   }
 }
 
-
-/// TODO: this method needs work 
 /*
 // description
 selects x bonds that are not known to exist,
@@ -252,9 +247,7 @@ set<string> NVMBNode::SelectPossibleBondsToDelete() {
   string edge;
 
   while (maxNumConsideredBonds > 0) {
-    /// TODO: delete below.
     edge = SelectBondFromBestPath("old", 1000);
-    //edge = SelectBondFromBestPath("old", "phantom", 10);
     if (edge != "") {
       output.insert(edge);
     }

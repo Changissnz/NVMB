@@ -1,7 +1,7 @@
 #ifndef NVMB_NODE_HPP
 #define NVMB_NODE_HPP
 #define DISCOVERY_TAX 0.2
-#define NUM_THREADS 5
+#define NUM_THREADS 
 
 #include <assert.h>
 #include <stdexcept>
@@ -134,7 +134,6 @@ public:
     }
 
     ///////// file node_discovery
-
     float DiscoveryRequirementMeasure();
     bool IsDiscoveryProcessRunning();
     void DiscoveryReview(int verbose);
@@ -201,7 +200,7 @@ public:
     void MarkDiscoveryFinished();
     void ExecutePlan(int verbose);
     void CalculatePlansTestMode(int verbose); 
-    void CalculatePlans(int verbose);// = false);
+    void CalculatePlans(int verbose);
     set<int> GetKnownNodes();
     set<int> FindCompetitors();
     void NewBondReview(set<int> recognizedCompetitors, int verbose);
@@ -212,7 +211,6 @@ public:
     bool IsContractedWith(int nodeIdentifier);
     void UpdateContract(int nodeIdentifier, bool transmissionSuccess, float delta, int pathDistance); 
     void UpdateContract(int nodeIdentifier, bool alve);
-    ///void ConductContract_(Contract* C); 
 
     vector<int> GetPlanCounts();
 

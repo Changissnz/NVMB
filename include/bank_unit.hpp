@@ -73,7 +73,7 @@ public:
     float GetNetChangeAtTimestamp();
     float GetNetChangeAtTimestamp(int timestamp);
 
-    /// TODO: warning, no checks coded 
+    /// TODO: warning, no error-check 
     /*
     // description 
     adds timestamp to cache 

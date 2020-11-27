@@ -153,6 +153,13 @@ TimestampUnit* NVMBNode::TimestampSummary() {
     otherDetails["numPathsRatio"] = to_string(npu->GetBestPathsToKnownRatio()); 
     otherDetails["pathsInfo"] = npu->PathInfoToString(); 
 
+    /// TODO: &^ strategy functions
+    otherDetails["competitionMeasure"] = GetStrategy()->competitionMeasure; 
+    otherDetails["contractMeasure"] = GetStrategy()->contractMeasure; 
+    otherDetails["newContractMeasure"] = GetStrategy()->newContractMeasure; 
+    otherDetails["bondAdvantageMeasure"] = GetStrategy()->bondAdvantageMeasure; 
+    otherDetails["bondDeletionAdvantageMeasure"] = GetStrategy()->bondDeletionAdvantageMeasure; 
+
     TimestampUnit* tsu = new TimestampUnit("summary", timestamp, otherDetails); 
     return tsu; 
 }

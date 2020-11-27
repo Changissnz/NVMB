@@ -84,15 +84,6 @@ TEST(Node_PostDiscovery_BreakBondDummyPlan_Execution_Test, Node_PostDiscovery_Br
 
   // sender and receiver nodes
   ASSERT_EQ(bankValuesBefore[5] > bankValuesAfter[5], true);
-  //ASSERT_EQ(bankValuesBefore[6] > bankValuesAfter[6], true); 
-
-  /// TODO: delete this. uncomment to display the bank values before and after
-  /*
-  cout << "BANK DATA" << endl;
-  for (auto c: bankValuesBefore) {
-    cout << "bank for node " << c.first << "| before " << c.second << " after " << bankValuesAfter[c.first] << endl;
-  }
-  */
 
   // check that edge 5-6 no longer exists
   ASSERT_EQ(N.EdgeExists(5,6, false), false);
@@ -179,7 +170,6 @@ TEST(Node_PostDiscovery_MakeContractDummyPlan_Execution_Test, Node_PostDiscovery
   N.RunOneTimestamp(true);
 
   // check active contracts
-  ///N.DisplayExistingContracts();
   ASSERT_EQ(N.contents[3]->IsContractedWith(7) && N.contents[7]->IsContractedWith(3), true);
 }
 
@@ -197,7 +187,7 @@ TEST(Node_PostDiscovery_MakeContractDummyPlan_SenderReceiverReject_Execution_Tes
 
   // run DFS on all nodes
   RunNetworkDFSProcessOnAllNodes(N);
-    cout << "[X] TIMESTAMP:\t" << N.contents[3]->GetTimestamp() << endl;  
+  cout << "[X] TIMESTAMP:\t" << N.contents[3]->GetTimestamp() << endl;  
 
   // insert dummy plan
   Plan* dummyPlan = new Plan(s->planIndex, "phantom", "make_contract", 3, 7, 0.0, -1);

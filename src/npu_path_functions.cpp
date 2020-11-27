@@ -450,9 +450,6 @@ vector<pair<int, pair<vector<int>, vector<int>>>> NodeProcessingUnit::BestPathsA
   return output;
 }
 
-/*
-// description
-*/
 vector<pair<float,float>> NodeProcessingUnit::BestPathRiskInfoForNewContract(int node) {
 
   auto bp = bestPaths[node];

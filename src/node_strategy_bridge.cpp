@@ -113,7 +113,6 @@ void NVMBNode::ExecuteGivenPlan(Plan* p, int verbose) {
 
 void NVMBNode::MarkDiscoveryFinished() {
   // iterate through executedPlans and mark
-  // ADD PLAN HERE.
   NodeStrategos* strategy = GetStrategy();
   vector<Plan*> plans = strategy->GetPlansInExecution();
   if (plans.size() == 0) {
@@ -135,7 +134,6 @@ void NVMBNode::MarkDiscoveryFinished() {
   npu->discoveryOn = false;
 }
 
-// TODO : add Plan-maker code to this method
 /*
 // description
 Executes the next plan designated by NodeStrategos.
@@ -202,11 +200,15 @@ void NVMBNode::CalculatePlans(int verbose) {
         cout << "*********************************************" << endl; 
         cout << "NODE " << GetId() << "\n" << "DISCOVERY REVIEW" << endl;
     };
+
+  if (verbose == 2) {
+    cout << "PRESENT COMPETITORS" << endl; 
+    DisplayIterable(GetStrategy()->competitors); 
+  }
   
-  // CHECK DISCOVERY HERE 
+  // do review
   DiscoveryReview(verbose);
 
-  // do review
   if (verbose == 2) { cout << "NEW BOND REVIEW" << endl;};
   NewBondReview(ns->competitors, verbose);
 
@@ -245,7 +247,8 @@ set<int> NVMBNode::GetKnownNodes() {
 
     knownNodes.clear(); 
     knownNodes = kn;
-    return kn;
+    knownNodes.erase(identifier); 
+    return knownNodes;
 }
 
 /// TODO: keep a running record of Node's competitors
@@ -348,9 +351,23 @@ void NVMBNode::ExistingContractReview(int verbose) {
   NodeStrategos* ns = npu->GetStrategy();
   Plan* p;
 
+  /*
+  cout << "contract info for " << identifier << endl; 
+  for (auto c: ns->activeContracts) {
+    c->DisplayInfo(); 
+  }
+  cout << "AFTERR" << endl; 
+  */ 
+
   for (int i = 0; i < ns->activeContracts.size(); i++) {
     auto x = ConsiderExistingContract(ns->activeContracts[i]);
-    p = ns->BreakContractPlan(GetId(), GetId(), x, (ns->activeContracts[i])->receiver, (ns->activeContracts[i])->idn);
+    p = ns->BreakContractPlan(GetId(), GetId(), (ns->activeContracts[i])->receiver, x, (ns->activeContracts[i])->idn);
+    /*
+    cout << "plan for contract" << endl; 
+    (ns->activeContracts[i])->DisplayInfo(); 
+    cout << "^^^" << endl; 
+    p->DisplayInfo(); 
+    */
     ns->InsertFuturePlan(p);
   };
   if (verbose == 2) {cout << "================================" << endl;};
@@ -698,8 +715,12 @@ void NVMBNode::WriteOutToFile(bool threshold) {
         }
     }
 
+    cout << "SIZE THRESHOLD " << TIMESTAMP_SIZE_THRESHOLD << endl; 
+    cout << GetId() << " writing out to file" << endl; 
+
     // iterate through timestamps and write them out 
-    map<int,vector<TimestampUnit*>> tsuh = bank->GetTimestampUnitHistory(); 
+    map<int,vector<TimestampUnit*>> tsuh = bank->GetTimestampUnitHistory();
+    cout << "size of map: " << tsuh.size() << endl; 
     string s; 
     for (auto c: tsuh) {
         auto vec = c.second; 

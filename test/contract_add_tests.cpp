@@ -16,7 +16,6 @@ Test details:
 - Dummy plan: 0 proposes direct contract to each of nodes 3,6,9 
 - Assertions: 
         - correct number of finished plans for node 6 
-        - 
 */ 
 TEST(N1n0_RunDiscovery_ExecuteManualContractInput_Check, CheckManConInp) {
 
@@ -51,10 +50,8 @@ Test details:
 TEST(N1n0_RunDiscovery_ExecuteManualContractInput2_Check, CheckManConInp2) {
 
     vector<int> x = vector<int>{1,2,3,4,5,6,7,8,9};
-
-    Network N = Network1WithNodesInSelfMode(x);
+    Network N = Network1WithNodesInSelfMode(x);    
     RunNetworkDFSProcessOnActiveNodes(&N); 
-
 
     NVMBNode* n0 = N.contents[0]; 
     n0->SetToManualInput(true);
@@ -86,27 +83,13 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput2_Check, CheckManConInp2) {
     auto plan0 = N.contents[0]->GetPlanCounts(); 
 
     vector<int> ans0 = {0,0,0,2}; 
-
-    
     auto planss = (N.contents[0]->GetStrategy())->GetPlansInExecution(); 
 
     for (auto p: planss) {
         p->DisplayInfo(); 
     }
 
-    /*
-    ASSERT_EQ(plan0, ans0); 
-
-    auto plan2 = N.contents[2]->GetPlanCounts(); 
-    vector<int> ans2 = {0,0,0,0}; 
-    ASSERT_EQ(plan2, ans2); 
-
-    cout << "PLAN COUNTS FOR NODE 3" << endl; 
-    auto plan3 = N.contents[3]->GetPlanCounts(); 
-    DisplayIterable(plan3); 
-    vector<int> ans3 = {0,0,0,0}; 
-    ASSERT_EQ(plan3, ans3); 
-    */ 
+    //// TODO: make assertion for plan counts
 }
 
 /*
@@ -132,9 +115,9 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput3_Check, CheckManConInp3) {
     // declare and run network before manual contract 
     vector<int> x = vector<int>{1,2,4,5,7,8,9};
     Network N = Network1WithNodesInSelfMode(x);
-    
+    //Network N = Network1(); 
+    //SetNetworkNodesActiveStatus(&N,x,"inactive"); 
     RunNetworkDFSProcessOnActiveNodes(&N); 
-
     cout << "CURRENT TIME " << N.contents[0]->GetTimestamp() << endl; 
 
     // set manual contract for node 0 
@@ -211,8 +194,10 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput4_Check, CheckManConInp4) {
     /// 0 5 8 3 
     vector<int> x = vector<int>{1,2,4,6,7,8,9};
     Network N = Network1WithNodesInSelfMode(x);
-    
     RunNetworkDFSProcessOnActiveNodes(&N); 
+
+    cout << "KNOWN NODES FOR 0" << endl; 
+    DisplayIterable(N.contents[0]->GetKnownNodes()); 
 
     NVMBNode* n0 = N.contents[0]; 
     n0->SetToManualInput(true);
@@ -261,9 +246,7 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput4_Check, CheckManConInp4) {
 
     vector<int> ans = {0,0,0}; 
     ASSERT_EQ(n0c == ans, true); 
-
     ASSERT_EQ(n3c == ans, true); 
-
     ASSERT_EQ(n5c == ans, true);
 } 
 
@@ -273,11 +256,12 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput4_Check, CheckManConInp4) {
 Network erases an edge used in routing comm flare. 
 Tests for comm flare routing failure. 
 */ 
+///// TODO: rewrite this
+
 TEST(N1n0_RunDiscovery_ExecuteManualContractInput5_Check, CheckManConInp5) {
 
     vector<int> x = vector<int>{1,2,4,6,7,8,9};
     Network N = Network1WithNodesInSelfMode(x);
-    
     RunNetworkDFSProcessOnActiveNodes(&N); 
 
     NVMBNode* n0 = N.contents[0]; 
@@ -292,7 +276,7 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput5_Check, CheckManConInp5) {
     // know that by default settings, default path is
     //  0 5 8 3 
     // remove edge 5 8 
-    N.BreakEdge(5, 8, 0); 
+   ///N.BreakEdge(5, 8, 0); 
 
     set<int> act = {0}; 
     SetNetworkNodesActiveStatus(&N, act, "active");   
@@ -301,16 +285,29 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput5_Check, CheckManConInp5) {
     /// ERROR: bank requires timestamp for contract 
     // check correct timestamp 
     bool n0Correct = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "make_contract"); 
+    cout << "[0] check node timestamp for mc" << endl; 
     ASSERT_EQ(n0Correct, true); 
 
     bool n3Correct = CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1, "make_contract"); 
-    ASSERT_EQ(n3Correct, false); 
+
+    auto bank = N.contents[3]->GetBank(); 
+    vector<TimestampUnit*> x2 =  bank->GetTimestampUnitHistoryAtRange(N.contents[3]->GetTimestamp() - 1, N.contents[3]->GetTimestamp()); 
+
+    for (auto x_: x2) {
+        x_->DisplayInfo(); 
+        cout << "@@@" << endl; 
+    }
+
+    cout << "[1] check node timestamp for mc: " << n3Correct << endl; 
+    /// TODO: error, check here  
+    ASSERT_EQ(n3Correct, true); 
 
     // check best path validity for node 0 
     int remv = (N.contents[0]->npu)->RemoveRecordsOfEdge(NodePairToString(5,8));  
-
+    cout << "[2] remove records" << endl; 
     ASSERT_EQ(remv, 0);
 }
+////////
 
 /*
 // description 
@@ -414,6 +411,8 @@ TEST(NetworkNodeContractCFTest, ContractCFTestCorrect) {
 
     vector<int> x = vector<int>{1,2,3,4,5,7,8};
     Network N = Network1WithNodesInSelfMode(x);
+    //Network N = Network1(); 
+    //SetNetworkNodesActiveStatus(&N,x,"inactive"); 
     RunNetworkDFSProcessOnActiveNodes(&N); 
 
     NVMBNode* n0 = N.contents[0]; 

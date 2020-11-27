@@ -8,6 +8,7 @@ TEST(N1n0_RunContractProcedureThenBreak, CorrectBreakOfCont) {
 
     vector<int> x = vector<int>{1,2,3,4,5,6,7,8};
     Network N = Network1WithNodesInSelfMode(x);
+
     RunNetworkDFSProcessOnActiveNodes(&N); 
 
     NVMBNode* n0 = N.contents[0]; 
@@ -64,8 +65,4 @@ TEST(N1n0_RunContractProcedureThenBreak, CorrectBreakOfCont) {
     cout << "[2] SUMMMM 9" << endl; 
     N.contents[9]->SummarizeLastNTimestamps(1); 
 
-} 
-
-/// TODO: make better display of each node's move per timestamp 
-/// TODO: run 100 rounds and check data 
-//----------------------------------------------------------------
+}

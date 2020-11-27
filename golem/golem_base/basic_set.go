@@ -8,8 +8,6 @@ import (
 	"fmt"
 )
 
-// TODO : basic set will operate using string keys
-
 /*
 */
 type Placer struct{}
@@ -55,9 +53,22 @@ func (b *BasicSet) AddBunch(s []string) int {
 	return c
 }
 
-/// TODO: complete this.
+/*
+*/ 
+func (b *BasicSet) DoesExist(s string) bool {
+	_, ok := b.datos[s] 
+	return ok
+}
+
+/// TODO:
 func (b *BasicSet) DeleteOne() {
 
+}
+
+func (b *BasicSet) SubtractSet(b2 *BasicSet) {
+	for k,_ := range b2.datos {
+		delete(b.datos, k) 	
+	}
 }
 
 /*

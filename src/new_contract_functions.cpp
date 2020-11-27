@@ -46,6 +46,7 @@ float NewContractBasedOnPredictedWorth(vector<int> bestPathLengths, float commer
   return ZeroDiv(numerator, denumerator, 1.0);
 }
 
+/// TODO:
 /*
 // description
 */

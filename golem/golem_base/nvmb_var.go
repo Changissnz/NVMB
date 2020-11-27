@@ -6,6 +6,7 @@ package golem
 
 import (
 	"fmt"
+	"strconv"
 )
 
 var NVMB_NODEDATA_TYPEMAP = map[string]string{
@@ -29,68 +30,75 @@ var NVMB_NODEDATA_TYPEMAP = map[string]string{
 	"knownNodes": "vector",
 	"competitors": "vector",
 	"numPathsRatio": "float",
-	"pathsInfo": "vector"} 
+	"pathsInfo": "vector",
+	"competitionMeasure": "string",
+	"contractMeasure": "string",
+	"newContractMeasure": "string",
+	"bondAdvantageMeasure": "string",
+	"bondDeletionAdvantageMeasure": "string"}  
 
-/// TODO: do this below
-type DataVariable struct {
-	cfGain float64
-	contractGain float64 
-	currency float64 
-	negotiation float64 
-	nodeConnectivity float64 
-	nodeRank float64 
-	numPathsRatio float64 
-	numberOfContracts float64 
-	numberOfPathsPerTargetRatio float64 
-	targetsPathRiskRatio float64 
-	transmission float64 
+/////////////////////////////////////////////////
+
+type InputOutputDataVariable struct {
+	input []float64
+	output []float64
 }
+
+func SliceToInputOutputDataVariable(data []float64, inputIndices *BasicSet, outputIndices *BasicSet) *InputOutputDataVariable {
+	x := InputOutputDataVariable{} 
+
+	for i, d := range data {
+		q := strconv.Itoa(i)
+
+		switch {
+		
+		case inputIndices.DoesExist(q): 
+			x.input = append(x.input, d) 
+			
+		case outputIndices.DoesExist(q): 
+			x.output = append(x.output, d) 
+
+		default: 
+			panic(fmt.Sprintf("index %d is not input or output", i)) 
+		}
+	}
+
+	return &x 
+}
+
+type DataVariable []float64 
 
 type DataVariableSlice struct {
-	data []*DataVariable
+	data [][]float64
 }
 
-func (dv *DataVariable) Len() int { return 12 }
+func (dvs DataVariableSlice) Len() int { return len(dvs.data)} 
 
-func (dvs *DataVariableSlice) Len() int { return len(dvs.data)} 
-
-func (dvs *DataVariableSlice) Values(i int) []float64 {
-
-	output := make([]float64,0) 
-	dv := dvs.data[i]
-
-	output = append(output, dv.cfGain) 
-	output = append(output, dv.contractGain) 
-	output = append(output, dv.currency) 
-	output = append(output, dv.negotiation) 
-	output = append(output, dv.nodeConnectivity) 
-	output = append(output, dv.nodeRank) 
-	output = append(output, dv.numPathsRatio)  
-	output = append(output, dv.numberOfContracts) 
-	output = append(output, dv.numberOfPathsPerTargetRatio) 
-	output = append(output, dv.targetsPathRiskRatio) 
-	output = append(output, dv.transmission)  
-
-	return output
+func (dvs DataVariableSlice) Values(i int) []float64 {
+	return dvs.data[i] 
 }
 
+////////////////////////////////////
+
+/// TODO: variables need to be observed.
 type Variable struct {
 	varName string
 	varValue float64 // TODO: maybe DataValue is better?
-	spareValue string
+	///varValue interface{}
+	varValueS string
 	varValue2 float64 // can be used as loss
 	associatedValues []float64
 }
 
 func (v *Variable) MakeCopy() *Variable {
 	v2 := &Variable{varName: v.varName, varValue: v.varValue,
-		spareValue: v.spareValue, varValue2: v.varValue2,
+		varValueS: v.varValueS, varValue2: v.varValue2,
 		associatedValues: v.associatedValues} 
 	return v2 
 }
 
 func DisplayVarSlice(v []*Variable) {
 	for _, v_ := range v {
-		fmt.Println(fmt.Sprintf("%s %f", v_.varName, v_.varValue))
+		fmt.Println(fmt.Sprintf("name: %s\tvalue: %f\tvalueS: %s", v_.varName, v_.varValue, v_.varValueS))
 	}
 }

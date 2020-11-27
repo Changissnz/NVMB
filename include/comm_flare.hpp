@@ -16,7 +16,7 @@ class CommFlare
 
 public:
   std::vector<int> targetPath;
-    std::pair<int, int> nullEdge; // default is -1,-1
+  std::pair<int, int> nullEdge; // default is -1,-1
   Proposition* proposition;
   int currentDestination;
   int vertexLocation;
@@ -36,6 +36,8 @@ public:
   bool active;
 
   CommFlare(std::vector<int> tp, Proposition* p, int cd, int pi, int noi) {
+    std::cout << "comm flare info" << std::endl; 
+    DisplayIterable(tp); 
     assert (tp.size() >= 2);
     targetPath = tp;
     nullEdge = std::make_pair(-1,-1); 

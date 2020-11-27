@@ -1,6 +1,5 @@
 // network contains all node instances and represents the network of virtual
 // machines. Methods for network have been
-
 #include "network.hpp"
 using namespace std;
 
@@ -8,16 +7,29 @@ int MAX_FLARES = 5000;
 int MAX_FLARE_MULTIPLIER = 4;
 
 /*
+// description
 sets the node nature variables to random variables 
-*/ 
-map<string,string> MakeRandomNodeNatureVariables() {
-    map<string,string> natureVar = map<string,string>();
-    natureVar["competition"] = to_string(RandomFloat()); 
-    natureVar["greed"] = to_string(RandomFloat()); 
-    natureVar["negotiation"] = to_string(RandomFloat()); 
-    natureVar["growth"] = to_string(RandomFloat()); 
-    return natureVar; 
-}
+*/
+map<string,string> MakeRandomNodeNatureVariables(string mode) {
+    map<string,string> deltas = map<string,string>();
+
+    if (mode == "all") {
+        deltas["competition"] = to_string(RandomFloat()); 
+        deltas["greed"] = deltas["competition"]; 
+        deltas["negotiation"] = deltas["competition"]; 
+        deltas["growth"] = deltas["competition"]; 
+
+    } else if (mode == "each") {
+        deltas["competition"] = to_string(RandomFloat()); 
+        deltas["greed"] = to_string(RandomFloat()); 
+        deltas["negotiation"] = to_string(RandomFloat()); 
+        deltas["growth"] = to_string(RandomFloat()); 
+    } else {
+        throw invalid_argument("invalid mode for random node nature delta") ;
+    }
+
+    return deltas; 
+} 
 
 bool Network::NodeExists(int nodeIdentifier) {
   return (contents.find(nodeIdentifier) == contents.end()) ? false : true;
@@ -124,9 +136,9 @@ void Network::UpdateNodeData() {
     NVMBNode* n;
     BankUnit* b;
 
-    //#pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
-    //{
-    //    #pragma omp for
+    #pragma omp parallel num_threads(DEFAULT_NUM_THREADS)
+    {
+        #pragma omp for
         for (map<int, NVMBNode*>::iterator it = contents.begin(); it != contents.end(); it++) {
             n = it->second;
             if (n == nullptr) {continue;} 
@@ -135,7 +147,7 @@ void Network::UpdateNodeData() {
             b->LogTimestampData();
             n->SetTimestamp(timestamp); 
         };
-
+    }
     return;
 }
 
@@ -259,16 +271,16 @@ void Network::RunOneTimestamp(int verbose) {
         n->ProcessOne(verbose);
     };
 
-   
-
     // update
     UpdateNodes(verbose);
     WriteOutToFile(true); 
 }
 
 void Network::Run(int verbose, int numRounds) { 
+    if (neighborsKnownAtStart) {
+        PrerunProcess(); 
+    }
 
-    PrerunProcess(); 
     if (numRounds > 0) {
         while (IsAlive() && numRounds) {
             if (verbose == 1 || verbose == 2) {cout << "** TIMESTAMP:\t" << timestamp << endl;}; 
@@ -286,36 +298,15 @@ void Network::Run(int verbose, int numRounds) {
     ShutDown();    
 }
 
-void Network::RunRandomNodeNatureVars(int verbose, int numRounds, float switchFrequency) {
-    
-    PrerunProcess(); 
-    if (numRounds > 0) {
-        while (IsAlive() && numRounds) {
-            if (verbose == 1 || verbose == 2) {cout << "** TIMESTAMP:\t" << timestamp << endl;}; 
-            RunOneTimestamp(verbose); 
-            UpdateNodeNaturesAtRandom(switchFrequency);
-            numRounds--; 
-        }
-    } else {
-        while (IsAlive()) {
-             if (verbose == 1 || verbose == 2) {cout << "** TIMESTAMP:\t" << timestamp << endl;}; 
-            RunOneTimestamp(verbose); 
-            UpdateNodeNaturesAtRandom(switchFrequency); 
-        }        
-    }
-    
-    WriteOutToFile(false); 
-    ShutDown();  
-} 
-
-void Network::UpdateNodeNaturesAtRandom(float freq) {
+void Network::UpdateNodeNaturesAtRandom(float freq, string randomNatureType, string updateType) {
 
     for (auto c: contents) {
-        UpdateNodeNatureAtRandom(c.first, freq); 
+        UpdateNodeNatureAtRandom(c.first, freq, randomNatureType, updateType); 
     }
 }
 
-void Network::UpdateNodeNatureAtRandom(int nodeId, float freq) { 
+/// TODO: incorporate node strategy variables 
+void Network::UpdateNodeNatureAtRandom(int nodeId, float freq, string randomNatureType, string updateType) { 
 
     if (contents[nodeId] == nullptr) {
         return; 
@@ -326,17 +317,16 @@ void Network::UpdateNodeNatureAtRandom(int nodeId, float freq) {
         return; 
     }
 
-    map<string,string> nodeNature = MakeRandomNodeNatureVariables(); 
-
-    auto strategy = contents[nodeId]->GetStrategy(); 
-    strategy->competition = stof(nodeNature["competition"]); 
-    strategy->greed = stof(nodeNature["greed"]); 
-    strategy->negotiation = stof(nodeNature["negotiation"]); 
-    strategy->negotiation = stof(nodeNature["growth"]); 
-    strategy->CalculateNormedNatureVar(); 
+    map<string,string> nodeNature = MakeRandomNodeNatureVariables(randomNatureType); 
+    ///map<string,float> nodeNature = RandomNodeNatureDelta("each"); 
+    auto strategy = contents[nodeId]->GetStrategy();
+    strategy->ChangeNodeNS(nodeNature, updateType); 
 }
 
-
+/// TODO: add Network arg. for prerun
+/*
+// description
+*/
 void Network::PrerunProcess() {
     for (auto c: contents) {
 
@@ -348,13 +338,7 @@ void Network::PrerunProcess() {
         auto npu = c.second->npu; 
         npu->LoadInitialPaths(); 
     }
-
-    for (auto c: contents) {
-        cout << "NODEEE " << c.first << endl; 
-        (c.second->npu)->DisplayBestPaths(); 
-    }
 }
-
 
 void Network::ShutDown() {
     for (auto c: contents) {
@@ -362,7 +346,8 @@ void Network::ShutDown() {
             continue; 
         }
         cout << "shutting down " << c.first << endl; 
-        c.second->ShutDown(); 
+        c.second->ShutDown();
+        delete c.second;
     }
 }
 
@@ -383,7 +368,6 @@ void Network::ActivitySummaryUpdate() {
 void Network::WriteOutToFile(bool threshold) {
     for (auto c: contents) {
         if (c.second == nullptr) {continue;}
-        cout << c.first << " writing out to file" << endl; 
         c.second->WriteOutToFile(threshold);  
     }
 }

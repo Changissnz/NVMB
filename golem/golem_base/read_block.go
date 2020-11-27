@@ -9,16 +9,16 @@ package golem
 import (
 	"fmt"
 	"sync"
-	///"gonum.org/v1/gonum/mat"
 )
 
 type Block struct {
 	datos [][]string
+	transposeOn bool 
 	keys  []int /// TODO: review this variable. may be unused
 }
 
 func OneBlock() *Block {
-	return &Block{datos: make([][]string, 0)}
+	return &Block{datos: make([][]string, 0), transposeOn: false} 
 }
 
 func (b *Block) Dims() (int,int) {
@@ -60,6 +60,35 @@ func (b *Block) GetAt(i int) []string {
 	}
 
 	return b.datos[i]
+}
+
+/*
+*/ 
+func (b *Block) GetAtByIndices(indices []int) *Block {
+
+	b2 := OneBlock() 
+	b2.transposeOn = b.transposeOn 
+	b2.keys = b.keys 
+
+	for _, x := range indices {
+		b2.AddOne(b.GetAt(x))  
+	}
+
+	return b2
+}
+
+/// TODO: not tested yet. 
+/*
+outputs a column 
+*/ 
+func (b *Block) GetAtCol(i int) []string {
+	x := make([]string,0) 
+
+	l := b.Length() 
+	for j := 0; j < l; j++ {
+		x = append(x, b.GetAtOne([]int{j, i}))
+	}
+	return x 
 }
 
 /*
@@ -205,7 +234,6 @@ func (b *Block) FetchColumns(indices []int) *Block {
 	go func() {
 		for i := 0; i < l; i++ {
 			er, stat := b.FetchElementsAtRow(i, indices)
-			
 			if stat {
 				b2.SetAt(i, er)
 			}
@@ -216,6 +244,44 @@ func (b *Block) FetchColumns(indices []int) *Block {
 	wg.Wait() 
 
 	return b2 
+}
+
+	/// TODO: inefficient 
+func (b *Block) CollectColumnValues(index int) []string {
+	x := make([]string, 0) 
+
+	for i, _ := range b.datos {
+		x  = append(x, b.datos[i][index]) 	
+	}
+
+	return x
+}
+
+	/// TODO: inefficient 
+func (b *Block) Transpose() { 
+
+	if (b.Length() == 0) {
+		panic("cannot transpose empty data") 
+	}
+
+	w := b.Width() 
+	newData := make([][]string, w) 
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	go func() {
+		for i := 0; i < w; i++ {
+			data := b.CollectColumnValues(i) 
+			newData[i] = data
+		}
+		wg.Done() 
+	}()
+
+	wg.Wait()
+
+	b.datos = newData
+	b.transposeOn = !b.transposeOn 
 }
 
 /*

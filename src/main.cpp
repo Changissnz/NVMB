@@ -9,18 +9,11 @@
 //#include <unistd.h>
 using namespace std; 
 
-////////// methods used to generate data 
 /*
-void ManualSetNetworkNodeVars(Network* N) {
-} 
+types of modifications: 
 
-void RunNetworkDeadStyle(Network* N) {
-} 
-
-void RunNetworkPatternStyle(Network* N, int randomSeedGenerator) { 
-} 
-*/
-
+- need to add the strategy moves node chooses each round. 
+*/ 
 int main(int argc, char **argv) {
 	cout << "HELLLO" << endl; 
 	cout << "CALLING GO FUNC " << endl;
@@ -30,7 +23,5 @@ int main(int argc, char **argv) {
     printf("awesome.Add(12,99) = %d %d\n", Add(a, b), IncorpGolem());
 
     cout << "incorporating golem = " << IncorpGolem() << endl; 
-
-
 	return -1; 
 } 

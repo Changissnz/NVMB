@@ -1,7 +1,7 @@
 package golem
 
 import (
-	//"fmt"
+	"fmt"
 	"testing" 
 )
 
@@ -51,4 +51,38 @@ func Test_SortStringSliceAscending(t *testing.T) {
 			panic("error: wrong sort") 
 		}
 	}	
+}
+
+/*
+*/
+func Test_BayesianIdentityOfFloatSliceSubset(t *testing.T) {
+	floatRange := &Pair{a: 3.0, b: 105.0} 
+	usedIndexRanges := []*Pair{&Pair{a: 3.0, b: 5.0},
+				&Pair{a: 8.0, b: 10.0}, &Pair{a: 12.0, b: 12.5},
+				&Pair{a: 18.0, b: 22.1}, &Pair{a: 29.0, b: 45.0},
+				&Pair{a: 103.0, b: 105.0}}
+
+	x := BayesianIdentityOfFloatSliceSubset(floatRange, usedIndexRanges)
+	expected := []*Pair{&Pair{a: 5.0, b: 8.0},
+	&Pair{a: 10.0, b: 12.0}, &Pair{a: 12.5, b: 18.0},
+	&Pair{a: 22.1, b: 29.0}, &Pair{a: 45.0, b: 103.0}}
+
+	for i,x_ := range x {
+		if x_.a.(float64) != expected[i].a.(float64) {
+			panic("incorrect bayesian identity for float slice subset!")
+		}
+	}
+}
+
+func Test_SampleSubrangesForRange(t *testing.T) {
+	p := &Pair{a: 0.0, b: 100.0}
+	output := SampleSubrangesForRange(p, nil, 30, []*Pair{}, 3, true)
+	fmt.Println("OUTPUT") 
+	DisplayPairSlice(output)
+}
+
+func Test_InterfaceSliceToIntSlice(t *testing.T) {
+	px := []interface{}{1.0,2.0,3.0} 
+	py := InterfaceSliceToIntSlice(px) 
+	fmt.Println("INTERFACE SLICE TO INT SLICE ", py)
 }

@@ -8,6 +8,10 @@ import (
 	"sync"
 )
 
+/// TODO: data generation could use some work.
+/*
+*/ 
+
 var CPARTSIZE int = 1000 // concurrency reader partition size
 const DEFAULT_MAX_CLASSES int = 100
 
@@ -16,6 +20,18 @@ const DEFAULT_MAX_CLASSES int = 100
 type Pair struct {
 	a, b interface{}
 }
+
+func DisplayPair(p *Pair) {
+	fmt.Println(p.a, " ", p.b) 
+}
+
+func DisplayPairSlice(p []*Pair) {
+	for _,p_ := range p {
+		DisplayPair(p_) 
+		fmt.Println("----------------------")
+	}
+}
+
 
 func containsInt(s []int, e int) bool {
 	for _, a := range s {
@@ -32,6 +48,7 @@ opens a file at path
 func Openness(fp string) *os.File {
 
 	fi, err := os.OpenFile(fp, os.O_APPEND|os.O_RDWR, 0666)
+	//fi, err := os.OpenFile(fp, os.O_TRUNC, 0666)
 	if err != nil {
 		panic("invalid output file path")
 	}
@@ -385,6 +402,7 @@ func GetPartitionInfo(size int) Pair {
 	return Pair{numX, rem}
 }
 
+///////////////////////////////// START: write to csv file ////////////////////
 /*
 writes csv string to file in append mode
 */
@@ -400,6 +418,12 @@ func CSVDataToFile(fp string, cs [][]string) bool {
 
 	writer := csv.NewWriter(fi)
 	writer.WriteAll(cs)
-	writer.Flush()
 	return true
 }
+
+func CSVDataToFileObject(fi *os.File, cs [][]string) {
+	writer := csv.NewWriter(fi)
+	writer.WriteAll(cs)
+}
+
+///////////////////////////////// END: write to csv file ////////////////////

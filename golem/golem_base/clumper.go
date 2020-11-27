@@ -5,10 +5,9 @@ import (
 	"fmt"
 )
 
-
 type Clumper struct {
 	dataCache []*DataVariable
-	data *DataVariableSlice
+	data DataVariableSlice
 }
 
 func OneClumper(x []*InstanceCapture) *Clumper { 
@@ -17,17 +16,18 @@ func OneClumper(x []*InstanceCapture) *Clumper {
 	return c
 }
 
+/// TODO: code missing from previous function 
 func (c *Clumper) LoadData(x []*InstanceCapture) {
-	c.dataCache = make([]*DataVariable, 0)
-	for _, x_ := range x {
-		dv := InstanceInfoToDataVariable(x_)
-		///fmt.Println("got data variable for ", i, "  ", dv)
-		c.dataCache = append(c.dataCache, dv) 
+	q := make([][]float64,0) 
+
+	for i,x_ := range x {
+		fmt.Println("YES ", i)
+		dv := InstanceInfoToDataVariable(x_) 
+		q = append(q, dv) 
 	}
 
-	c.data = &DataVariableSlice{data: c.dataCache}
-	c.dataCache = nil
-} 
+	c.data = DataVariableSlice{data: q}
+}
 
 /// TODO: numIterations needs to be coded. 
 func (c *Clumper) KMeansClump(numCenters int, numIterations int) {
@@ -41,8 +41,15 @@ func (c *Clumper) KMeansClump(numCenters int, numIterations int) {
 	/////
 	km.Seed(numCenters)
 
+
+
 	values := km.Values()
-	///centers := km.Centers()
+	centers := km.Centers()
+
+	for _, c := range centers {
+		fmt.Println("center is ", c)
+	}
+
 
 	fmt.Println("NUM VALUES : ", len(values))
 	for _, v := range values {
@@ -52,51 +59,12 @@ func (c *Clumper) KMeansClump(numCenters int, numIterations int) {
 	}
 }
 
-func InstanceInfoToDataVariable(instInf *InstanceCapture) *DataVariable {
-	dv := &DataVariable{} 
 
-	for i, ic := range instInf.inputVariables {
-		vn := ParseDeltaString(ic.varName) 
-		SetDataVariableByValue(dv, vn, instInf.judgmentValues[i]) 
+func InstanceInfoToDataVariable(instInf *InstanceCapture) []float64 {
+	dv := make([]float64, 0)
+
+	for _, x := range instInf.judgmentValues {
+		dv = append(dv, x) 
 	}
 	return dv 
-} 
-
-func SetDataVariableByValue(dv *DataVariable, varName string, value float64) {
-
-	switch {
-
-		case (varName == "cf gain__delta"):
-			dv.cfGain = value
-
-		case (varName == "contract gain__delta"): 
-			dv.contractGain = value
-
-		case (varName == "currency__delta"): 
-			dv.currency = value
-
-		case (varName == "negotiation__delta"): 
-			dv.negotiation = value
-
-		case (varName == "node connectivity__delta"): 
-			dv.nodeConnectivity = value
-
-		case (varName == "nodeRank__delta"): 
-			dv.nodeRank = value
-
-		case (varName == "num paths ratio__delta"): 
-			dv.numPathsRatio = value
-
-		case (varName == "number of contracts__delta"): 
-			dv.numberOfContracts = value
-
-		case (varName == "number of paths per target ratio__delta"): 
-			dv.numberOfPathsPerTargetRatio = value
-
-		case (varName == "targets path risk ratio__delta"): 
-			dv.targetsPathRiskRatio = value
-
-		case (varName == "transmission__delta"): 
-			dv.transmission = value
-	}
-} 
+}

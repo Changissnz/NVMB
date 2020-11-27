@@ -3,11 +3,6 @@ package golem
 import (
 	"fmt"
 	"testing"
-	//"time"
-	//"reflect"
-	//"strconv"
-	//"encoding/csv"
-	//"io"
 )
 
 func SetUpClumperInput() []*InstanceCapture {
@@ -22,13 +17,12 @@ func SetUpClumperInput() []*InstanceCapture {
 
 func Test_Clump_KMeansClump(t *testing.T) {
 	
-	ic := SetUpClumperInput() 
-	fmt.Println("NUM DATAS : ", len(ic)) 
-
+	ic := SetUpClumperInput()
 	oc := OneClumper(ic) 
-	
 	fmt.Println("NUM DATAS : ", oc.data.Len()) 
-	oc.KMeansClump(5, -1) 
-} 
-
+	
+	
+	oc.KMeansClump(2, -1) 
+	
+}
 

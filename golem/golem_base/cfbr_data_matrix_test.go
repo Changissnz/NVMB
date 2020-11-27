@@ -8,18 +8,12 @@ class ConcurrentFileBlockReader
 import (
 	"fmt"
 	"testing"
-	//"time"
-	//"reflect"
-	//"strconv"
-	//"encoding/csv"
-	//"io"
 )
 
 var TESTFP_1 string = "./datos/node_data/node_0"
 var TESTFP_5 string = "./datos/node_data/node_5"
 
 /*
-used
 */ 
 func SetUpMatrix1(fp string) *CFBRDataMatrix {
 	x := OneConcurrentFileBlockReader(fp)
@@ -50,7 +44,6 @@ func Test_CFBRDataMatrix_FetchRowRangeNumerical(t *testing.T) {
 	fmt.Println("*** TCFR*** ")
 	m3,_ := m.FetchRowRangeNumerical(0, 15, "float") 
 	m3r,m3c := m3.Dims() 
-	///fmt.Println("DIM ", m3r, m3c)
 	
 	if m3r != 15 || m3c != 10 {
 		panic("invalid dim for float retrieval")
@@ -62,39 +55,24 @@ func Test_CFBRDataMatrix_IndexRange(t *testing.T) {
 	m := SetUpMatrix1(TESTFP_1) 
 	m.Preprocess() 
 
-	/// uncomment below for display 
-	/*
-	fd1, fd2 := m.convertedData["float"].Dims()
-	fmt.Println("FLOAT:\t", fd1, fd2) 
-	
-	id1, id2 := m.convertedData["int"].Dims()
-	fmt.Println("INT:\t", id1, id2) 
-	
-	sd1, sd2 := m.stringData.Dims() 
-	fmt.Println("STRING:\t", sd1,sd2) 
-
-	vd1, vd2 := m.vectorData.Dims() 
-	fmt.Println("VECTOR:\t", vd1,vd2)
-	*/ 
-
 	fd1, fd2 := m.convertedData["float"].Dims()	
 	id1, id2 := m.convertedData["int"].Dims()	
 	sd1, sd2 := m.stringData.Dims() 
 	vd1, vd2 := m.vectorData.Dims() 
 
-	if (fd1 != 30 || fd2 != 10) {
+	if (fd1 != 349 || fd2 != 10) {
 		panic("invalid dim for float data")
 	}
 
-	if (id1 != 30 || id2 != 1) {
+	if (id1 != 349 || id2 != 1) {
 		panic("invalid dim for int data")
 	}
 
-	if (sd1 != 30 || sd2 != 2) {
-		panic("invalid dim for float data")
+	if (sd1 != 349 || sd2 != 7) {
+		panic("invalid dim for string data")
 	}
 
-	if (vd1 != 30 || vd2 != 7) {
+	if (vd1 != 349 || vd2 != 7) {
 		panic("invalid dim for vector data")
 	}
 }

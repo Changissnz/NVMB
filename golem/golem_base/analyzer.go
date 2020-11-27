@@ -2,9 +2,15 @@ package golem
 
 import (
 	"fmt"
-	//"math"
+	"os"
+	"encoding/csv"
 )
 
+/*
+The Analyzer class is used for time-series based data. 
+It uses both the classes <Fetcher> and <ConcurrentFileBlockReader> 
+to collect time-series based data according to time-interval arguments. 
+*/
 type Analyzer struct {
 	fetchr *Fetcher
 	readr *ConcurrentFileBlockReader
@@ -20,15 +26,6 @@ type Analyzer struct {
 	clumpr *Clumper
 }
 
-/// TODO: delete below constructor 
-func OneAnalyzer(d *CFBRDataMatrix) *Analyzer {
-	d.Preprocess() 
-	f := OneFetcher(d)
-	t := OneThresher() 
-	return &Analyzer{fetchr: f, thresher: t, readrBlockIndex: 0} 
-}
-
-// TODO: this constructor will replace above
 func OneAnalyzer_(fp string) *Analyzer {
 	r := OneConcurrentFileBlockReader(fp) 
 	r.ManualColumnTypeSet(NVMB_NODEDATA_TYPEMAP)
@@ -37,11 +34,11 @@ func OneAnalyzer_(fp string) *Analyzer {
 	return a 
 }
 
-/// TODO: this needs to be error checked. 
 /*
-loads one partition from reader onto fetchr. If no data is left, 
-outputs false.  
-*/ 
+loads the first block of the next partition from reader onto fetchr.
+If no data is left, outputs false.  
+*/
+/// TODO: postHop is not needed  
 func (a *Analyzer) LoadOneRead(readType string, postHop int) bool {
 
 	// read partition 
@@ -52,7 +49,7 @@ func (a *Analyzer) LoadOneRead(readType string, postHop int) bool {
 
 	// read partition into matrix and add leftovers from last partition 
 	matrix := a.readr.ConvertPartitionBlockToMatrix(0)
-	
+
 	if a.leftovers != nil {
 		a.leftovers.StackMatrix(matrix)
 		matrix = a.leftovers 
@@ -140,7 +137,6 @@ func (a *Analyzer) CollectDataOnePartition(readType string, deltaOp string) bool
 	for {
 		a.CollectBlockData(deltaOp) 
 		c++ 
-
 		if !a.SlideFetcher(a.postH) {
 			break 
 		}
@@ -154,7 +150,7 @@ func (a *Analyzer) CollectDataOnePartition(readType string, deltaOp string) bool
 func (a *Analyzer) CollectBlockData(deltaOp string) {
 	l := len(a.fetchr.analysis) - a.postH
 	for i := a.priorH; i < l; i++ {
-		ic := a.CaptureAtTimestamp(i, deltaOp, a.priorH, a.postH) 
+		ic := a.CaptureAtTimestamp(i, deltaOp, a.priorH, a.postH)
 		a.instanceInfo = append(a.instanceInfo, ic) 
 	}
 }
@@ -163,7 +159,6 @@ func (a *Analyzer) CollectBlockData(deltaOp string) {
 collects delta info given a range.
 */ 
 func (a *Analyzer) CollectData(deltaOp string, start int, end int) []*Variable {
-	a.fetchr.GatherVariablesInitial()
 	deltaV := a.fetchr.CalculateDelta(deltaOp, start, end)  	
 	return deltaV
 }
@@ -172,9 +167,9 @@ func (a *Analyzer) CollectData(deltaOp string, start int, end int) []*Variable {
 */
 func (a *Analyzer) FormatCapture_PriorAtAfter(bef []*Variable, at []*Variable, aft []*Variable) *InstanceCapture {
 	ic := OneInstanceCapture("NVMB")
-	ic.CaptureInput(bef) 
-	ic.CaptureControl(at) 
-	ic.CaptureOutput(aft)
+	ic.CaptureByType(bef, "input")
+	ic.CaptureByType(at, "control")
+	ic.CaptureByType(aft, "output")
 	return ic 
 }
 
@@ -184,7 +179,7 @@ captures data at timestamp and outputs an InstanceCapture.
 func (a *Analyzer) CaptureAtTimestamp(timestamp int, deltaOp string, priorHop int, postHop int) *InstanceCapture {///([]*Variable, []*Variable, []*Variable) {
 	beforeRangeStart, beforeRangeEnd := timestamp - priorHop, timestamp 
 	afterRangeStart, afterRangeEnd :=  timestamp + 1, timestamp + postHop + 1 
-	varBef := a.CollectData(deltaOp, beforeRangeStart, beforeRangeEnd) 
+	varBef := a.CollectData(deltaOp, beforeRangeStart, beforeRangeEnd)
 	varAft := a.CollectData(deltaOp, afterRangeStart, afterRangeEnd)
 	return a.FormatCapture_PriorAtAfter(varBef, a.fetchr.analysis[timestamp], varAft)
 }
@@ -202,43 +197,34 @@ func (a *Analyzer) ObtainDifferencePrePostOp(is *InstanceCapture, negVars []stri
 	for i,v := range is.inputVariables {
 		v_ := is.outputVariables[i]
 
-		vn := ParseDeltaString(v_.varName) 
-		if vn != ParseDeltaString(v.varName) {
-			panic("ERROR")
+		vn,_,_ := ParseDeltaString(v_.varName) 
+		vn2,_,_ := ParseDeltaString(v.varName) 
+
+		if vn != vn2 {
+			panic(fmt.Sprintf("ERROR: could not parse string %s", vn))
 		}
 
 		mul := float64(1) 
 		if StringIndexInSlice(negVars, vn) != -1 {
 			mul = -1
 		}
+
 		diff = append(diff, mul * (v_.varValue - v.varValue))  
 	}
 	
 	return diff
 }
 
-func (a *Analyzer) JudgeInstanceCapture_Criteria1(diff []float64, threshold float64) bool { 
-
-	c := 0 
-	for _, d := range diff {
-		if d > threshold {
-			c++ 
-		}
-	}
-
-	r := ZeroDiv(float64(c), float64(len(diff)), 0.0, 0.0)
-	if r >= 0.5 {
-		return true 
-	}
-	return false 
-
-}
-
+//// TODO: remove thresher
+/*
+*/
 func (a *Analyzer) SetThresher(criteria string, negVars []string) {
 	a.thresher.thresholdType = criteria
 	a.thresher.directionality = negVars
 } 
 
+/*
+*/
 func (a *Analyzer) GatherJudgmentValues() {
 	if a.thresher.thresholdType == "" {
 		panic("threshold type must be set!")
@@ -257,11 +243,123 @@ func (a *Analyzer) GatherJudgmentValues() {
 }
 
 /*
+TODO WARNING: 
+outcome column not added to csv output file
 */
-func (a *Analyzer) ConvertInstanceInfoToClumperFormat() {
+func (a *Analyzer) InstanceInfoToFile(fp string) { 
 
+	fi, _ := os.OpenFile(fp, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+	writer := csv.NewWriter(fi) 
+	cols := a.InstanceInfoColumns()	
+	writer.Write(cols)
+
+	// write
+	for _, ii := range a.instanceInfo {
+		colData := a.InstanceCaptureToStringSlice(ii)
+		writer.Write(colData) 
+	}
+
+	writer.Flush() 
+	fi.Close()
 }
 
+/*
+TODO WARNING: 
+outcome column not added to return
+*/
+func (a *Analyzer) InstanceCaptureToStringSlice(ii *InstanceCapture) []string {
+
+	// timestamp data
+	columns := make([]string,0) 
+
+	input := ii.inputVariables
+
+	var startPrior, endPrior, startPost, endPost string
+	for _, inp := range input {
+		_, startPrior, endPrior = ParseDeltaString(inp.varName)
+		if startPrior != "" {
+			break
+		}
+	}
+
+	output := ii.outputVariables
+	for _, inp := range output {
+		_,startPost,endPost = ParseDeltaString(inp.varName) 
+		if endPost != "" {
+			break
+		}
+	}
+
+	columns = append(columns, []string{startPrior, endPrior, startPost, endPost}...)
+	// prior values 
+	for i := 0; i < len(input); i++ {
+		s := DefaultFloat64ToString(input[i].varValue) 
+		columns = append(columns, s) 
+	}
+
+	// control
+	control := ii.controlVariables
+	for i := 0; i < len(control); i++ {
+		var s string 
+		switch {
+		case StringIndexInSlice(NVMB_STRING_VARS,control[i].varName) == -1:
+			s = DefaultFloat64ToString(control[i].varValue)
+		default: 
+			s = control[i].varValueS	
+		}		
+		columns = append(columns, s) 
+	}
+
+	// post 
+	for i := 0; i < len(output); i++ {
+		s := DefaultFloat64ToString(output[i].varValue) 
+		columns = append(columns, s) 
+	}
+
+	return columns
+}
+
+func (a *Analyzer) InstanceInfoColumns() []string {
+	if len(a.instanceInfo) == 0 {
+		panic("panicking about no instance informations!") 
+	}
+
+	columns := make([]string,0)
+
+	// timestamp data
+	columns = append(columns, []string{"start_prior", "end_prior", "start_post", "end_post"}...)
+
+	// prior
+	input := a.instanceInfo[0].inputVariables
+	for i := 0; i < len(input); i++ {
+		q,_,_ := ParseDeltaString(input[i].varName)
+		if q != "" {
+			columns = append(columns, q + "_prior")
+		}
+	}
+
+	// control
+	control := a.instanceInfo[0].controlVariables
+	for i := 0; i < len(control); i++ {
+		columns = append(columns, control[i].varName)  
+	}
+
+	// get start and end for post
+	output := a.instanceInfo[0].outputVariables
+	for i := 0; i < len(output); i++ {
+		q,_,_ := ParseDeltaString(output[i].varName)
+		if q != "" {
+			columns = append(columns, q + "_post")
+		}
+	}
+
+	return columns
+}
+
+/////////////////////////////////// END TODO: relocate this to InstanceCapture struct file
+
+/*
+*/
 func (a *Analyzer) StartThresher() { 
 	// get number of variables 
 	if len(a.instanceInfo) == 0 {
@@ -272,9 +370,14 @@ func (a *Analyzer) StartThresher() {
 	return 
 }
 
+
+////////////////////////////////// TODO: below is under development. Delete? 
+
+/// TODO: not used
+/*
+*/
 func (a *Analyzer) RunThresher(limit float64, increment float64) {
 	
-	// TODO: code this below 
 	posCount := 0 
 	for _, c  := range a.instanceInfo {
 		c.judgment = a.JudgeInstanceCapture_Criteria1(c.judgmentValues, a.thresher.thresholdTypeOne + increment)
@@ -285,3 +388,21 @@ func (a *Analyzer) RunThresher(limit float64, increment float64) {
 	a.thresher.positive = ZeroDiv(float64(posCount), float64(len(a.instanceInfo)), 0.0, 0.0)
 } 
 
+/*
+*/
+func (a *Analyzer) JudgeInstanceCapture_Criteria1(diff []float64, threshold float64) bool { 
+
+	c := 0 
+	for _, d := range diff {
+		if d > threshold {
+			c++ 
+		}
+	}
+
+	r := ZeroDiv(float64(c), float64(len(diff)), 0.0, 0.0)
+	if r >= 0.5 {
+		return true 
+	}
+	return false 
+
+}

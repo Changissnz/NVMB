@@ -72,9 +72,7 @@ extern "C" {
 /*
 test function 
 */
-
-extern GoInt Add(GoInt p0, GoInt p1);
-
+extern GoInt Add(GoInt a, GoInt b);
 extern GoInt IncorpGolem();
 
 #ifdef __cplusplus

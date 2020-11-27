@@ -2,10 +2,6 @@
 #include "bond_functions.hpp"
 #include <iostream>
 
-// TODO: all bond functions and contract_review and new_contract functions
-//          must be checked. 
-
-
 /*
 // description
 only proposer will incur this cost. Based on node connectivity, maximally
@@ -146,22 +142,8 @@ Calculates the CompetitorBreakScore for each split path.
 */
 pair<float,float> GetCompetitorBreakScore(pair<int, pair<vector<int>, vector<int>>> brokenPathUnit, set<int> competitors, float coeff1, float coeff2) {
 
-  // for display
-  /*
-  cout << "**** break score info" << endl;
-  cout << "* competitors" << endl;
-  DisplayIterable(competitors);
-  */
   auto p1 = brokenPathUnit.second.first;
   auto p2 = brokenPathUnit.second.second;
-
-  // for display
-  /*
-  cout << "broken path before" << endl;
-  DisplayIterable(p1);
-  cout << "broken path after" << endl;
-  DisplayIterable(p2);
-  */
 
   map<int,bool> ind1 = FindCompetitorIndices(p1, competitors);
   map<int,bool> ind2 = FindCompetitorIndices(p2, competitors);
@@ -209,7 +191,6 @@ between affected best paths and their alternative paths.
 /// TODO: this measure does not take into account the entire network (all nodes),
 ///       only the affected paths. This could pose a problem.
 float BondBreakAdvantageMeasure_PathScores(vector<pair<int, pair<float, float>>> brokenPathInfo, float worstPathScore, float coeff1, float coeff2) {
-  // TODO: make `totalWorstPathScore` for the entire network instead of just affected paths.
   float totalWorstPathScore = worstPathScore * brokenPathInfo.size();
   float cumulativeChange = 0.0;
   for (auto it = brokenPathInfo.begin(); it != brokenPathInfo.end(); it++) {

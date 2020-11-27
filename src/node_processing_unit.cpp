@@ -106,9 +106,6 @@ bool NodeProcessingUnit::Process1DF(DiscoveryFlare* df) {
   DiscoveryFlare* df2;
   DiscoveryFlare* df3;
 
-  ///set<int> ni = df->GetNeighborIdentifiers();
-  ///set<int>::iterator it = ni.begin();
-
     // randomize below ordering 
   vector<int> ni = SetToShuffledVector(df->GetNeighborIdentifiers()); 
   vector<int>::iterator it = ni.begin();  
@@ -128,7 +125,7 @@ bool NodeProcessingUnit::Process1DF(DiscoveryFlare* df) {
     it++;
   };
 
-    int q = MAX_FLARE_MULTIPLIER; 
+  int q = MAX_FLARE_MULTIPLIER; 
 
   // make flares for all other untravelled edges
   while (it != ni.end()) {
@@ -252,7 +249,7 @@ void NodeProcessingUnit::DisplayCF(string flareLabel) {
     }
 }
 
-/// TODO: delete this.
+/// TODO: refactor this.
 /*
 // description
 updates variables, including:
@@ -337,10 +334,24 @@ bool NodeProcessingUnit::PathExists(vector<int> path, int key) {
   return false;
 }
 
-void NodeProcessingUnit::UpdateMaxPathLength(int pathLength) {
+/// TODO: careful, call this method after discovery process is finished. 
+void NodeProcessingUnit::UpdateMaxPathLength() {
+  /*
   if (pathLength > maxPathLength) {
     maxPathLength = pathLength;
   }
+  */ 
+  maxPathLength = 0;
+
+  for (auto sp: bestPaths) {
+    for (auto sp2: sp.second) {
+      if (maxPathLength < sp2.first.size()) {
+        maxPathLength = sp2.first.size(); 
+      }
+    }
+  }
+
+  
 }
 
 /*
@@ -352,8 +363,11 @@ bool NodeProcessingUnit::AddBetterPath(int key, vector<int> path, float score) {
     if (bestPaths[key].size() == 0) {
         bestPaths[key] = vector<pair<vector<int>, float>>();
         bestPaths[key].push_back(make_pair(path, score));
-
+        /*
+        cout << "updating max path" << endl; 
+        DisplayIterable(path); 
         UpdateMaxPathLength(path.size());
+        */ 
         return true;
     }
 
@@ -376,7 +390,11 @@ bool NodeProcessingUnit::AddBetterPath(int key, vector<int> path, float score) {
         if (score <= it->second) {
             p = make_pair(path, score);
             bestPaths[key].insert(it, p);
+            /*
+            cout << "updating max path" << endl; 
+            DisplayIterable(path); 
             UpdateMaxPathLength(path.size());
+            */ 
             best = true; 
             break;
         }
@@ -646,7 +664,13 @@ CommFlare* NodeProcessingUnit::ProduceCommFlare(Plan* p) {
   }
 
   vector<int> path = pathInfo.first;
+
+  cout << nodeOwnerIdentifier << " prop for cf" << endl; 
+  prop->DisplayInfo(); 
   CommFlare* cf = new CommFlare(path, prop, destNode, p->identifier, nodeOwnerIdentifier);
+  
+  ///cf->DisplayInfo(); 
+  
   return cf;
 };
 

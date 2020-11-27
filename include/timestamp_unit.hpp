@@ -207,7 +207,13 @@ public:
 
         s += otherDetails2["competitors"] + ","; 
         s += otherDetails2["numPathsRatio"] + ","; 
-        s += otherDetails2["pathsInfo"];
+        s += otherDetails2["pathsInfo"] + ","; 
+
+        s += otherDetails2["competitionMeasure"] + ","; 
+        s += otherDetails2["contractMeasure"] + ","; 
+        s += otherDetails2["newContractMeasure"] + ","; 
+        s += otherDetails2["bondAdvantageMeasure"] + ","; 
+        s += otherDetails2["bondDeletionAdvantageMeasure"]; 
 
         return s;  
   }; 

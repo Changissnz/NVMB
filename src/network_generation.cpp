@@ -43,12 +43,13 @@ map<int,vector<int>> GenerateRandomNetworkTemplate(int numberOfNodes, float conn
     return x; 
 }; 
 
-Network GenerateRandomNetwork(int nid, bool mortality, string folderPath, int numberOfNodes, float connectivity, string nodePrefix) {
-    Network N(nid, mortality);
+/// TODO: need to re-write 
+Network Network::GenerateRandomNetwork(int nid, bool mortality, bool nkas, string folderPath, int numberOfNodes, float connectivity, string nodePrefix) {
+    Network N(nid, mortality, nkas);
     auto networkTemplate = GenerateRandomNetworkTemplate(numberOfNodes, connectivity);
 
     for (auto x: networkTemplate) {
-        NVMBNode* n0 = new NVMBNode(x.first, folderPath, nodePrefix + "_" +  to_string(x.first), MakeRandomNodeNatureVariables()); 
+        NVMBNode* n0 = new NVMBNode(x.first, folderPath, nodePrefix + "_" +  to_string(x.first), MakeRandomNodeNatureVariables("each")); 
         for (int y: x.second) {
             n0->AddNeighbor(y); 
         };
@@ -57,4 +58,11 @@ Network GenerateRandomNetwork(int nid, bool mortality, string folderPath, int nu
     }
 
     return N; 
-} 
+}; 
+
+void Network::GenerateRandomNodeNatureDelta(string mode) {
+    nodeNatureDeltas = map<int, map<string,string>>(); 
+    for (auto it = contents.begin(); it != contents.end(); it++) {
+        nodeNatureDeltas[it->first] = MakeRandomNodeNatureVariables(mode); 
+    }
+};

@@ -10,7 +10,6 @@ import (
 	"math"
 )
 
-/// TODO: check each of the structvars below and delete unnecessary. 
 type CFBRDataMatrix struct {
 	floatData *Block
 	floatDataColumnKeys []int
@@ -36,13 +35,14 @@ type CFBRDataMatrix struct {
 
 	nullKey string
 
-	/// TODO: delete. unused
+	/// TODO: make sure these are used
 	undefinedKeys []int
 	undefinedLabels []string 
 }
 
 /*
-gets the index data given a column label in the form (int::index, string::dataType)
+return: 
+- (int::index, string::dataType)
 */ 
 func (c *CFBRDataMatrix) ColumnLabelToIndexData(columnLabel string) (int, string) {
 
@@ -69,6 +69,8 @@ func (c *CFBRDataMatrix) ColumnLabelToIndexData(columnLabel string) (int, string
 	panic(fmt.Sprintf("column label %s could not be found", columnLabel))
 } 
 
+/*
+*/
 func (c *CFBRDataMatrix) ValidIndex(index int, rowOrColumn string, dataType string) bool {
 	
 	if index < 0 {
@@ -125,7 +127,7 @@ func (c *CFBRDataMatrix) FetchValueString() {
 */
 func (c *CFBRDataMatrix) FetchRowNumerical(r int, dataType string) ([]float64, bool) {
 	if dataType != "int" && dataType != "float" {
-		panic("invalid data type")
+		panic("[cfbr data matrix] invalid data type")
 	}
 	return MatrixRowToFloat64Slice(c.convertedData[dataType], r)
 }
@@ -139,7 +141,6 @@ func (c *CFBRDataMatrix) FetchRowRangeNumerical(startRange int, endRange int, da
 	}
 
 	output := make([]float64,0) 
-
 	for i := startRange; i < endRange; i++ {
 		toAdd, stat := c.FetchRowNumerical(i, dataType) 
 		if (!stat) {
@@ -249,6 +250,17 @@ func (c *CFBRDataMatrix) Preprocess() {
 	c.UpdateDims() 
 }
 
+func (c *CFBRDataMatrix) Dims() (int,int) {
+	r := c.intDim.a.(int) 
+
+	c_ := c.intDim.b.(int) 
+	c_ += c.floatDim.b.(int)
+	c_ += c.stringDim.b.(int) 
+	c_ += c.vectorDim.b.(int) 
+
+	return r, c_
+}
+
 /*
 sets dimensions for each partition of data
 */
@@ -323,6 +335,39 @@ func (c *CFBRDataMatrix) IndexRange(start int, end int) *CFBRDataMatrix {
 	c2.UpdateDims()
 	return c2
 }
+
+/// TODO CAUTION: has not been tested
+func (c *CFBRDataMatrix) CollectByIndices(indices []int) *CFBRDataMatrix {
+	c2 := &CFBRDataMatrix{} 
+
+	// string data 
+	sd := c.stringData.GetAtByIndices(indices)
+	c2.stringData = sd 
+	c2.stringDataColumnKeys = c.stringDataColumnKeys
+	c2.stringDataColumnLabels = c.stringDataColumnLabels
+	
+
+	// vector data 
+	vd := c.vectorData.GetAtByIndices(indices)
+	c2.vectorData = vd 
+	c2.vectorDataColumnKeys = c.vectorDataColumnKeys
+	c2.vectorDataColumnLabels = c.vectorDataColumnLabels
+
+	// float and int data 
+	c2.convertedData = make(map[string]*mat.Dense,0)
+
+	c2.convertedData["float"] = MatrixCollectByIndices(c.convertedData["float"], indices) 
+	c2.floatDataColumnKeys = c.floatDataColumnKeys
+	c2.floatDataColumnLabels = c.floatDataColumnLabels
+
+	c2.convertedData["int"] = MatrixCollectByIndices(c.convertedData["int"], indices) 
+	c2.intDataColumnKeys = c.intDataColumnKeys
+	c2.intDataColumnLabels = c.intDataColumnLabels
+
+	return c2
+} 
+
+
 
 /*
 stacks instance on top of c2. 

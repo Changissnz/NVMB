@@ -30,6 +30,8 @@ func OneFetcher(d *CFBRDataMatrix) *Fetcher {
 	return &Fetcher{data: d, currentRowIndex: 0} 
 }
 
+/*
+*/
 func (f *Fetcher) GetTimestampRowRange(rowIndex int) (int,int) {
 
 	colIndex, dataType := f.data.ColumnLabelToIndexData("time")
@@ -206,6 +208,8 @@ func (f *Fetcher) CollectValuesAtTimestamp(referenceColLabel string, referenceCo
 				if f.DataValueAt(dt1, []int{i, index1}).(string) == referenceColVal.(string) {
 					output = append(output, f.DataValueAt(dt2, []int{i,index2}))
 				}
+			default: 
+				panic("could not proceed with collecting values at timestamp")
 		}		
 	}
 
