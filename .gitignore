@@ -17,3 +17,6 @@ build/cmake/scratch.txt
 src/vuln.cpp
 src/vuln.hpp
 test/vuln_tests.cpp
+
+TODO.md 
+scratch

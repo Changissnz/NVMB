@@ -37,6 +37,9 @@
 ## Update: 5/7/2021 
 - Required libraries include Armadillo.
 
+## Update: 5/8/2021 
+- Planned restructuring and re-write of some components of network. 
+
 # [UPDATE] 
 - Machine learning algorithms and other functionalities will be pushed
   whenever contributor/s feel necessary and/or like it.
