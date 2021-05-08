@@ -9,6 +9,10 @@
   * OpenMP
 - Required libraries are:
   * GoogleTest
+  * Armadillo 
+    * `install these libraries for optimization`: 
+      - LAPACK 
+      - BLAS 
 - Data files used for testing: 
   - SOURCE: https://www.kaggle.com/mlg-ulb/creditcardfraud
   - NAME IT: `creditcard.csv`
@@ -29,6 +33,9 @@
 ## Update: Machine-learning 11/26/2020
 - `golem.DForest` class has been coded but not yet perfected.
 - `golem.Sampler` class needs to be optimized.
+
+## Update: 5/7/2021 
+- Required libraries include Armadillo.
 
 # [UPDATE] 
 - Machine learning algorithms and other functionalities will be pushed

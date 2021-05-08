@@ -12,5 +12,7 @@ find_package(GTest REQUIRED)
 file(GLOB TESTFILES "*.cpp")
 add_executable(testy ${TESTFILES})
 
+find_package(Armadillo REQUIRED)
+
 target_include_directories(testy PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-target_link_libraries(testy NVMBLib ${GTEST_LIBRARIES})
+target_link_libraries(testy NVMBLib ${GTEST_LIBRARIES} ${ARMADILLO_LIBRARIES}) 

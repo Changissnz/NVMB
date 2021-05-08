@@ -29,5 +29,6 @@ int main(int argc, char **argv) {
     //::testing::GTEST_FLAG(filter) = "N1n0_RunDiscovery_ExecuteManualContractInput4_Check*";
     //::testing::GTEST_FLAG(filter) = "Network__DemonstrateCompetitionMeasures*";
     //::testing::GTEST_FLAG(filter) = "NetworkRunTimestampNodeDeletionAndContract*";
+
     return RUN_ALL_TESTS();
 }

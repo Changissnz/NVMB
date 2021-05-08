@@ -13,3 +13,7 @@ golem/golem_base/datos/defaultx
 golem/golem_base/datos/defaultshort
 golem/golem_base/datos/testFile.csv
 build/cmake/scratch.txt
+
+src/vuln.cpp
+src/vuln.hpp
+test/vuln_tests.cpp
