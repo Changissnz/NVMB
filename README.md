@@ -40,20 +40,21 @@
 - binaries have been built.
 - run binaries with `./BINARY_NAME`
 
-## Update: Machine-learning 11/26/2020
-- `golem.DForest` class has been coded but not yet perfected.
-- `golem.Sampler` class needs to be optimized.
-
 ## UPDATE: 9/19/22
 - will continue working on automating functionalities within these next few months.
-
-## Update: 5/7/2021 
-- Required libraries include Armadillo.
 
 ## Update: 5/8/2021 
 - Planned restructuring and re-write of some components of network. 
 
-# [UPDATE] 
+## Update: 5/7/2021 
+- Required libraries include Armadillo.
+
+
+## Update: Machine-learning 11/26/2020
+- `golem.DForest` class has been coded but not yet perfected.
+- `golem.Sampler` class needs to be optimized.
+
+# [NOTE] 
 - Machine learning algorithms and other functionalities will be pushed
   whenever contributor/s feel necessary and/or like it.
 - Also, some refactoring is necessary. 
