@@ -30,9 +30,22 @@
   - NAME IT: `IRIS.csv`
   - PUT IT IN: `golem/golem_base/datos/other_data/`
 
+# Build instructions
+- Open up command line. 
+- Enable automatic `go get` commands from make file:
+`go env -w GO111MODULE=auto`
+- `cd` into the directory `build`
+- type in command `cmake ..`. 
+- type in command `make`.
+- binaries have been built.
+- run binaries with `./BINARY_NAME`
+
 ## Update: Machine-learning 11/26/2020
 - `golem.DForest` class has been coded but not yet perfected.
 - `golem.Sampler` class needs to be optimized.
+
+## UPDATE: 9/19/22
+- will continue working on automating functionalities within these next few months.
 
 ## Update: 5/7/2021 
 - Required libraries include Armadillo.
