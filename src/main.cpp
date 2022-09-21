@@ -15,6 +15,7 @@ types of modifications:
 - need to add the strategy moves node chooses each round. 
 */ 
 int main(int argc, char **argv) {
+    /*
 	cout << "HELLLO" << endl; 
 	cout << "CALLING GO FUNC " << endl;
 
@@ -24,4 +25,8 @@ int main(int argc, char **argv) {
 
     cout << "incorporating golem = " << IncorpGolem() << endl; 
 	return -1; 
+    */
+    ///////////
+    return -1;
+
 } 

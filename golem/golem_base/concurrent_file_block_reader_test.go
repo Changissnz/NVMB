@@ -29,7 +29,7 @@ func Test_ConcurrentFileBlockReader_Declaration(t *testing.T) {
 
 	// assert class has correct column names 
 	if !EqualStringSlices(x.columns, answer) {
-		panic("header column read is incorrect")
+		panic(fmt.Sprintf("header column read is incorrect, got %d expected %d",len(x.columns),len(answer)))
 	}
 
 	x.Shutdown()

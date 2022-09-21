@@ -190,7 +190,6 @@ func (c *ConcurrentFileBlockReader) ReadBlockAtSpot(bs int, collectData bool) (*
 				c.lineMarker += int64(i + 1) 
 				return b, int64(i), true
 			}
-			///fmt.Println("LEN OUT [0]: ", len(out))
 			if len(c.excludedColumnIndices) != 0 {
 				///fmt.Println("Y")
 				out = StringSliceCollectByIndices(out, c.excludedColumnIndices, true)

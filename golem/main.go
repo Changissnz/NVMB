@@ -23,4 +23,10 @@ func IncorpGolem() int {
 }
 
 func main() {
+	// uncommenteth these words 
+	/*
+	golem.GenerateFileDefaultX()
+	golem.GenerateFileDefault()
+	golem.GenerateFileDefault3()
+	*/ 
 }

@@ -40,6 +40,18 @@
 - binaries have been built.
 - run binaries with `./BINARY_NAME`
 
+# Test instructions
+After successfully performing build instructions,
+- test the C++ portion:
+    - `cd` into `build/test`.
+    - run `./testy`.
+- test the Golang portion by
+    - downloading and placing the data files into the appropriate folders as mentioned in the section `dependencies`.
+    - `cd` into `golem`.
+    - uncomment the code that generates the csv data.
+    - run `go run main.go`.
+    - test by `go test ./...`.
+
 ## UPDATE: 9/19/22
 - will continue working on automating functionalities within these next few months.
 

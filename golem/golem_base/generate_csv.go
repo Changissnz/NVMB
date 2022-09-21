@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	//"log"
 )
 
 /// TODO: data generation could use some work.
@@ -51,6 +52,23 @@ func Openness(fp string) *os.File {
 	//fi, err := os.OpenFile(fp, os.O_TRUNC, 0666)
 	if err != nil {
 		panic("invalid output file path")
+	}
+	return fi
+}
+
+/*
+// description
+creates new file at path if it does not exist
+
+// return
+new or existing file object
+*/
+func Newness(fp string) *os.File {
+
+	fi, err := os.OpenFile(fp, os.O_APPEND|os.O_RDWR, 0666)
+	if err != nil {
+		fi2,_ := os.Create(fp)
+		return fi2
 	}
 	return fi
 }
@@ -145,7 +163,7 @@ that denote either bools or floats
 func GenerateRandomCSVDataToFile(fp string, size int, numColumns int, randomFloatRange Pair, booleanVariables []int) {
 
 	// check if file exists
-	fi := Openness(fp)
+	fi := Newness(fp)
 
 	// write the rows first
 	rowLabels := GenerateDefaultRowLabels(numColumns)
@@ -316,7 +334,7 @@ flawsos := if nil, no error
 func GenerateRandomCSVDataToFileExtended(fp string, size int, numColumns int, randomFloatRange Pair, booleanVariables []int, stringVariables []int, flawso map[int]float32, headerOn bool) {
 
 	// generate header
-	fi := Openness(fp)
+	fi := Newness(fp)
 
 	// write the headers first
 	rowLabels := GenerateDefaultRowLabels(numColumns)
@@ -427,3 +445,97 @@ func CSVDataToFileObject(fi *os.File, cs [][]string) {
 }
 
 ///////////////////////////////// END: write to csv file ////////////////////
+
+
+func GenerateFileDefaultX() {
+	fp := "./golem_base/datos/defaultx" 
+	sz := 1000
+	nc := 20 
+	rfr := Pair{float32(3.4), float32(10.5)} 
+	bv := make([]int, 0) 
+	GenerateRandomCSVDataToFile(fp, sz, nc, rfr, bv)	
+}
+
+func GenerateFileDefault() {
+	/*
+	path, err := os.Getwd()
+	if err != nil {
+    	log.Println(err)
+	}
+	
+	fmt.Println("PATHOS")
+	fmt.Println(path) 
+
+	fp := path + "/golem_base/datos/default" 
+	fmt.Println("PATHOS2")
+	fmt.Println(fp) 
+	*/ 
+	fp := "./golem_base/datos/default" 
+
+	sz := 10050
+	nc := 20 
+	rfr := Pair{float32(3.4), float32(10.5)} 
+	bv := make([]int, 0) 
+	GenerateRandomCSVDataToFile(fp, sz, nc, rfr, bv)	
+}
+
+func GenerateFileDefault2() {
+	fp := "./golem_base/datos/default2" 
+	p := Pair{a: float32(3.5), b: float32(12.5)} 
+	bv := []int{0,1,3}
+	sv := []int{1,4,6,7} 
+	GenerateRandomCSVDataToFileExtended(fp, 100, 10, p, bv, sv, nil, true) 
+}
+
+func GenerateFileDefault3() {
+	fp := "./golem_base/datos/default3" 
+	p := Pair{a: float32(3.5), b: float32(12.5)} 
+	bv := []int{}
+	sv := []int{4,6,8,9,11}
+
+	/*
+	var answers map[int]string = map[int]string{0: "float",
+	1: "float",
+	2: "float",
+	3: "float",
+	4: "string",
+	5: "float",
+	6: "string",
+	7: "float",
+	8: "string",
+	9: "string",
+	10: "float",
+	11: "string",
+	12: "float",
+	13: "float",
+	14: "float",
+	15: "float",
+	16: "float",
+	17: "float",
+	18: "float",
+	19: "float"}
+	*/
+
+	var flawsos map[int]float32 = map[int]float32{0:0.2,
+		1: 0.2,
+		2: 0.2,
+		3: 0.2,
+		4: 0.2,
+		5: 0.2,
+		6: 0.2,
+		7: 0.2,
+		8: 0.2,
+		9: 0.2,
+		10: 0.2,
+		11: 0.2,
+		12: 0.2,
+		13: 0.2,
+		14: 0.2,
+		15: 0.2,
+		16: 0.2,
+		17: 0.2,
+		18: 0.2,
+		19: 0.2}
+	
+	GenerateRandomCSVDataToFileExtended(fp,100,10,p,bv,sv, flawsos,true)
+}

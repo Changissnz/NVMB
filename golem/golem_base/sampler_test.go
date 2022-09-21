@@ -44,7 +44,7 @@ func Test_Sampler_AnalyzeDataForTypeDC(t *testing.T) {
 	s := OneSampler(readr, 0.526672448)
 	s.PreprocessReader("regular", []string{}, []string{"Class"}) 
 	
-	x := s.AnalyzeDataForTypeDC()
+	s.AnalyzeDataForTypeDC()
 	if s.colFrequency[30][float64(0)] != 4997 {
 		panic(fmt.Sprintf("incorrect frequency collected for column %d, got %f", 31, s.colFrequency[30][float64(0)]))
 	}

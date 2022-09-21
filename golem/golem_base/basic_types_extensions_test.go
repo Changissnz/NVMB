@@ -6,8 +6,7 @@ import (
 )
 
 func Test_DefaultStringToFloat64Slice(t *testing.T) {
-
-	ts1 := " 1.000000 0.000000 0.000000 5.000000 0.000000 0.000000  "
+	ts1 := " 1.0100000 0.000000 0.000000 5.000000 0.000000 0.000000  "
 	floatSlice, stat := DefaultStringToFloat64Slice(ts1, ' ')
 
 	if (!stat) {

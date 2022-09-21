@@ -18,5 +18,18 @@ src/vuln.cpp
 src/vuln.hpp
 test/vuln_tests.cpp
 
+build/CMakeFiles
+build/go
+build/golem
+build/include
+build/src
+build/test
+build/cmake_install.cmake
+build/CMakeCache.txt
+build/libNVMBLib.a
+build/Makefile
+build/NVMB_EXEC
+
 TODO.md 
 scratch
+.gitignore
