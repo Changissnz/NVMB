@@ -118,9 +118,12 @@ TEST(N1n1_RunContractProcedureThenBreak, CorrectBreakOfCont_Direct) {
 
     bu->DisplayTimestampUnitHistory();
 
-    bool n1Correct = CheckNodeTimestampDataForEvent(N.contents[1], N.contents[1]->GetTimestamp() - 1, "contract activity");
-    bool n2Correct = CheckNodeTimestampDataForEvent(N.contents[2], N.contents[2]->GetTimestamp() - 1, "contract activity");
+    bool n1Correct = CheckNodeTimestampDataForEvent(N.contents[1], N.contents[1]->GetTimestamp(), "contract activity");
+    bool n2Correct = CheckNodeTimestampDataForEvent(N.contents[2], N.contents[2]->GetTimestamp(), "contract activity");
     
+    cout << "N1CORRECT: " << n1Correct << endl;
+    cout << "N2CORRECT: " << n2Correct << endl;
+
     ASSERT_EQ(n1Correct, false);
     ASSERT_EQ(n2Correct, false);
 }

@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
 
     /// TARGET BELOW 
 
-    ::testing::GTEST_FLAG(filter) = "N1n1_RunContractProcedureThenBreak*";
+    //::testing::GTEST_FLAG(filter) = "N1n1_RunContractProcedureThenBreak_Case2*";
 
     //::testing::GTEST_FLAG(filter) = "NetworkRunRecord*";
     //::testing::GTEST_FLAG(filter) = "NetworkRunRecord_RandomNodeNatures*";
