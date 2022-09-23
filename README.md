@@ -53,6 +53,26 @@ After successfully performing build instructions,
     - run `go run main.go`.
     - test by `go test ./...`.
 
+## UPDATE: 9/23/22
+
+- Memory leak tests by Valgrind in output file `build/valgrind-out.txt` demonstrates a high number of errors:
+```
+==4442== ERROR SUMMARY: 31483 errors from 317 contexts (suppressed: 0 from 0)
+```
+
+- Designer's notes:
+
+Many of these errors are due to the programming syntax that I used to
+declare variables and re-assign pointer values.
+
+I do not think these errors pose an issue to this working version of 
+`NVMB`. That is because most modern-day operating systems, including 
+mine, have memory-management capabilities such as releasing unused
+memory upon program exit.
+
+However, if this program is to be scaled, then the memory leak test output file `build/valgrind-out.txt` is a good starting point for narrowing down memory-bugs over computing clusters and networks.
+--------------------------------------------------------------------
+
 ## UPDATE: 9/19/22
 - will continue working on automating functionalities within these next few months.
 
