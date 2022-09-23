@@ -38,8 +38,8 @@
 - `cd` into the directory `build`
 - type in command `cmake ..`. 
 - type in command `make`.
-- binaries have been built.
-- run binaries with `./BINARY_NAME`
+- executables have been built.
+- run executables with `./BINARY_NAME`
 
 # Test instructions
 After successfully performing build instructions,
