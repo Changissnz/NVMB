@@ -49,7 +49,7 @@ After successfully performing build instructions,
 - test the Golang portion by
     - downloading and placing the data files into the appropriate folders as mentioned in the section `dependencies`.
     - `cd` into `golem`.
-    - uncomment the code that generates the csv data.
+    - uncomment the code in `main.go` that generates the csv data.
     - run `go run main.go`.
     - test by `go test ./...`.
 
