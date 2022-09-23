@@ -106,10 +106,11 @@ public:
       if (proposition == nullptr) {
           return "invalid"; 
       }
-
+    /*
     if (GetEventType() == "make_contract" || GetEventType() == "break_contract") {
       return GetEventType();
-    } 
+    }
+    */
 
     if (GetSender() == GetProposer()) {
       return proposition->category + "/direct";

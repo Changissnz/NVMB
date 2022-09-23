@@ -17,7 +17,7 @@ message("FINDING LIBRARIO: ${CMAKE_CURRENT_SOURCE_DIR}/include")
 set_target_properties(golemLib PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/include/libgolem_exec.so")
 
 # include header folder 
-target_include_directories(NVMBLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include) 
+target_include_directories(NVMBLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/test ${CMAKE_CURRENT_SOURCE_DIR}/include) 
 add_executable(NVMB_EXEC "src/main.cpp")
 
 # link the NVMBLib library and golem library to the NVMB_EXEC executable 

@@ -31,5 +31,5 @@ build/Makefile
 build/NVMB_EXEC
 
 TODO.md 
-scratch
+bot_vars_outline.md
 .gitignore

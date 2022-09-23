@@ -53,7 +53,7 @@ public:
     std::string newContractMeasure;
     // path scores-promise, skipped nodes-promise
     std::string bondAdvantageMeasure;
-    // skipped nodes,
+    // path scores,skipped nodes
     std::string bondDeletionAdvantageMeasure;
     std::set<int> competitors;
 
@@ -141,13 +141,13 @@ public:
     void SetRank(float r) {rank = r;};
 
     void SetCompetitiveness(float c) {
-        if (c >= 0.0 || c <= 1.0) {
+        if (c >= 0.0 && c <= 1.0) {
         competition = c;
         }
     };
 
     void SetGreediness(float g) {
-        if (g >= 0.0 || g <= 1.0) {
+        if (g >= 0.0 && g <= 1.0) {
         greed = g;
         }
     };

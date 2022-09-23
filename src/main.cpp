@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "libgolem_exec.h"
 #include "network_generation.hpp" 
-
+#include "network1.h"
 /// uncomment below for dynamic-loading 
 //#include <unistd.h>
 using namespace std; 
@@ -27,6 +27,5 @@ int main(int argc, char **argv) {
 	return -1; 
     */
     ///////////
-    return -1;
-
+    return -1;    
 } 

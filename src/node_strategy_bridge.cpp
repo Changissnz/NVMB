@@ -10,7 +10,6 @@ NodeStrategos
 executes plan and runs other processes
 */
 bool NVMBNode::ProcessOne(int verbose) {
-
   // execute current plan
   if (mode == "active") {
     ExecutePlan(verbose);
@@ -478,7 +477,7 @@ vector<int> NVMBNode::GetFlareCounts() {
     int of = npu->GetOwnedFlares().size(); 
     int ofc = npu->GetOwnedFlaresCache().size(); 
     int hf = npu->GetHeldFlares().size();
-    cout << "GOT"<< endl; 
+    cout << "GOT" << endl; 
     return {of,ofc,hf}; 
 }
 

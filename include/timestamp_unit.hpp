@@ -65,8 +65,9 @@ public:
 
     assert (et == "make_bond/phantom" ||
       et == "make_bond/direct"|| et == "break_bond/phantom" ||
-      et == "break_bond/direct" || et == "break_contract" ||
-      et == "make_contract" || et == "invalid");
+      et == "break_bond/direct" || et == "break_contract/direct" ||
+      et == "break_contract/phantom" || et == "make_contract/direct" ||
+      et == "make_contract/phantom" || et == "invalid");
 
     eventType = et;
     response = resp;

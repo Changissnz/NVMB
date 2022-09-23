@@ -46,10 +46,10 @@ Calculates the advantageousness of adding a bond by their path scores.
 *lower sums are better*
 
 // arguments
-affectedPaths - best paths affected by bond addition
-competitors - set of competitors
-coeff1 - variable coefficient value 1
-coeff2 - variable coefficient value 2
+- affectedPaths := best paths affected by bond addition
+- competitors := set of competitors
+- coeff1 := variable coefficient value 1
+- coeff2 := variable coefficient value 2
 */
 float BondAddAdvantageMeasure_PathScoresPromise(vector<pair<int, pair<float,float>>> affectedPaths,
     set<int> competitors, float coeff1, float coeff2) {
@@ -70,6 +70,15 @@ float BondAddAdvantageMeasure_PathScoresPromise(vector<pair<int, pair<float,floa
 // description
 Calculates the advantageousness of adding a bond by considering their skipped
 scores.
+
+// arguments
+- pathInfo := each element in vector is a pair with
+              [0] destination node
+              [1] nodes in previous paths which will no longer be taken in new paths
+                  because of new edge.
+- competitors := set of competitors
+- coeff1 := competition if direct bond, o.w. negotiation
+- coeff2 := greed
 */
 float BondAddAdvantageMeasure_PathSkippedNodesPromise(vector<pair<int, vector<int>>> pathInfo,
       set<int> competitors, float coeff1, float coeff2) {
@@ -118,11 +127,10 @@ description of scoring:
   *higher the negotiation, lower the score*
 
 // arguments
-index1 - of the first element with respect to path
-index2 - of the second element with respect to path
-size - number of edges of path
-negotiationMeasure - float
-
+- index1 := of the first element with respect to path
+- index2 := of the second element with respect to path
+- size := number of edges of path
+- negotiationMeasure := float
 */
 float GetPairwiseCompetitorIndexScore(int index1, int index2, int size, bool isComp1, bool isComp2, float coeff1, float coeff2) {
 

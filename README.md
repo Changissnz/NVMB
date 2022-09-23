@@ -31,7 +31,8 @@
   - PUT IT IN: `golem/golem_base/datos/other_data/`
 
 # Build instructions
-- Open up command line. 
+- Open up command line.
+- `cd` into `NVMB`. 
 - Enable automatic `go get` commands from make file:
 `go env -w GO111MODULE=auto`
 - `cd` into the directory `build`

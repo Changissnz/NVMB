@@ -201,8 +201,8 @@ vector<int> NodeProcessingUnit::ShortenPath(vector<int> path, pair<int,int> newB
 Calculates a vector of data relating to best paths resulting from a new bond,
 from this Node instance to another Node. Only the top path to each Node is considered.
 
-Output is a vector of elements,
-Each element is a pair,
+// return
+a vector of elements, each element is a pair,
   [0] is the destination node,
   [1] is a pair, first is path score before, second is path score after bond.
 */
@@ -266,8 +266,8 @@ vector<int> NodeProcessingUnit::GetSkippedNodes(vector<int> path, pair<int,int> 
 }
 
 /*
-// description
-Outputs a vector of elements, each element is a pair, with
+// return
+vector of elements, each element is a pair, with
 [0] the destination node
 [1] the vector of vertices skipped because of the new connection.
 */
@@ -297,8 +297,8 @@ vector<pair<int, vector<int>>> NodeProcessingUnit::BestPathsAffectedByNewBondSki
 }
 
 /*
-// description
-outputs the index of the first occurrence of bond in path 
+// return
+the index of the first occurrence of bond in path 
 */ 
  pair<int,int> NodeProcessingUnit::FindBondIndexInPath(vector<int> path, pair<int,int> bond) {
      int s = path.size() - 1; 
@@ -379,8 +379,8 @@ pair<bool, pair<float, float>>  NodeProcessingUnit::GetReplacementPathInfo(int k
 }
 
 /*
-// description
-Outputs a vector of elements, each element is a pair, with
+// return
+a vector of elements, each element is a pair, with
 [0] the destination node
 [1] [0] best path score
     [1] replacement path score (methodvar<worstPathScore> if no replacement)

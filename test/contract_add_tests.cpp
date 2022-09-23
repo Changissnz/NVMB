@@ -70,13 +70,13 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput2_Check, CheckManConInp2) {
     N.RunOneTimestamp(1); 
 
     // assert correct timestamp 
-    bool n0Correct = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "make_contract"); 
+    bool n0Correct = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "make_contract/phantom"); 
     ASSERT_EQ(n0Correct, true);
 
-    bool n2Correct = CheckNodeTimestampDataForEvent(N.contents[2], N.contents[2]->GetTimestamp() - 1, "make_contract"); 
+    bool n2Correct = CheckNodeTimestampDataForEvent(N.contents[2], N.contents[2]->GetTimestamp() - 1, "make_contract/phantom"); 
     ASSERT_EQ(n2Correct, true);
 
-    bool n3Correct = CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1, "make_contract"); 
+    bool n3Correct = CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1, "make_contract/phantom"); 
     ASSERT_EQ(n3Correct, false);
 
     // assert correct plan counts for each node. 
@@ -143,9 +143,9 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput3_Check, CheckManConInp3) {
 
     N.RunOneTimestamp(1); 
 
-    bool r0 = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "make_contract");
+    bool r0 = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "make_contract/direct");
     ASSERT_EQ(r0, true); 
-    bool r3 = CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1, "make_contract");  
+    bool r3 = CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1, "make_contract/direct");  
     ASSERT_EQ(r3, true); 
 
     // observe timestamp info for nodes 0 a nd 3 
@@ -161,7 +161,7 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput3_Check, CheckManConInp3) {
     /// 
     vector<int> other = {1,2,4,5,6,7,8,9}; 
     for (auto o : other) {
-        ASSERT_EQ(false, CheckNodeTimestampDataForEvent(N.contents[o], N.contents[o]->GetTimestamp() - 1, "make_contract"));  
+        ASSERT_EQ(false, CheckNodeTimestampDataForEvent(N.contents[o], N.contents[o]->GetTimestamp() - 1, "make_contract/direct"));  
     }
 
     x0 = N.contents[0]->GetPlanCounts(); 
@@ -230,13 +230,13 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput4_Check, CheckManConInp4) {
     b->DisplayTimestampUnitHistory(); 
 
     // check that nodes 0 and 5 recorded event, and 3 did not 
-    auto n0Correct = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1 ,"make_contract"); 
+    auto n0Correct = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1 ,"make_contract/phantom"); 
     ASSERT_EQ(n0Correct, true); 
 
-    auto n5Correct = CheckNodeTimestampDataForEvent(N.contents[5], N.contents[5]->GetTimestamp() - 1 ,"make_contract"); 
+    auto n5Correct = CheckNodeTimestampDataForEvent(N.contents[5], N.contents[5]->GetTimestamp() - 1 ,"make_contract/phantom"); 
     ASSERT_EQ(n5Correct, true);
 
-    auto n3Correct = CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1 ,"make_contract"); 
+    auto n3Correct = CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1 ,"make_contract/phantom"); 
     ASSERT_EQ(n3Correct, false);
 
     // comm flare check 
@@ -284,11 +284,11 @@ TEST(N1n0_RunDiscovery_ExecuteManualContractInput5_Check, CheckManConInp5) {
 
     /// ERROR: bank requires timestamp for contract 
     // check correct timestamp 
-    bool n0Correct = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "make_contract"); 
+    bool n0Correct = CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "make_contract/direct"); 
     cout << "[0] check node timestamp for mc" << endl; 
     ASSERT_EQ(n0Correct, true); 
 
-    bool n3Correct = CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1, "make_contract"); 
+    bool n3Correct = CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1, "make_contract/direct"); 
 
     auto bank = N.contents[3]->GetBank(); 
     vector<TimestampUnit*> x2 =  bank->GetTimestampUnitHistoryAtRange(N.contents[3]->GetTimestamp() - 1, N.contents[3]->GetTimestamp()); 
@@ -352,8 +352,8 @@ TEST(N1n0_ContractExecutionAttributes, CheckContractAttributesCorrect) {
     }
 
     // check other 
-    ASSERT_EQ(true, CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "make_contract")); 
-    ASSERT_EQ(true, CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1, "make_contract")); 
+    ASSERT_EQ(true, CheckNodeTimestampDataForEvent(N.contents[0], N.contents[0]->GetTimestamp() - 1, "make_contract/direct")); 
+    ASSERT_EQ(true, CheckNodeTimestampDataForEvent(N.contents[3], N.contents[3]->GetTimestamp() - 1, "make_contract/direct")); 
 
     // run another timestamp and check that contract updates nodes 0 and 3 correctly 
     N.RunOneTimestamp(1); 

@@ -32,8 +32,7 @@ Plan* MakeContractPhantomPlanDefaultForNode(NVMBNode* n, int senderNode, int rec
 
 // break contract plan 
 void BreakContractPlanDefaultForNode(NVMBNode* n , int contractedNode); 
-        /// TODO: has not yet been coded. 
-void BreakContractPhantomPlanDefaultForNode(NVMBNode* n , int contractedNode); 
+void BreakContractPhantomPlanDefaultForNode(NVMBNode* n, NVMBNode* n2, int receiverNode);
 
 void LoadPlanForNodeN(Network N, int n);  
 

@@ -325,7 +325,11 @@ void RunNetworkDFSProcessOnNode(Network* N, int nodeId) {
 
 /*
 // description
-runs discovery process on all nodes in Network N
+runs discovery process on all nodes in Network N.
+
+// note
+Method must be called at the
+beginning of simulation to ensure "discovery" process is called.
 
 // arguments
 N - network is at timestamp 0 with no inactive nodes
@@ -354,6 +358,14 @@ void RunNetworkDFSProcessOnAllNodes(Network N) {
   cout << "* rounds run:\t" << nr << endl;  
 }
 
+/*
+// description
+runs DFS process on all active nodes. 
+
+// note
+Method must be called at the
+beginning of simulation to ensure "discovery" process is called.
+*/ 
 void RunNetworkDFSProcessOnActiveNodes(Network* N) { 
     
     N->RunOneTimestamp(); 
@@ -481,7 +493,25 @@ void BreakContractPlanDefaultForNode(NVMBNode* n , int contractedNode) {
   ns->AddPlanToPriority(p); 
 } 
 
+void BreakContractPhantomPlanDefaultForNode(NVMBNode* n, NVMBNode* n2, int receiverNode) {
+  // iterate through node contracts and get contract id for target node. 
+  NodeStrategos* ns = n2->GetStrategy(); 
+  int contractId = -1;
+  for (auto x: ns->activeContracts) {
+    if (x->receiver == receiverNode) {
+      contractId = x->idn; 
+      break; 
+    }
+  }
 
+  // case: contract could not be found
+  if (contractId == -1) {
+    return; 
+  }
+
+  Plan* p = ns->BreakContractPlan(n->GetId(), n2->GetId(), receiverNode, 0.0, contractId); 
+  ns->AddPlanToPriority(p); 
+}
 
 /// TODO: code for all planTypes 
 /*

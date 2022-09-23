@@ -8,6 +8,9 @@ int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
 
     /// TARGET BELOW 
+
+    ::testing::GTEST_FLAG(filter) = "N1n1_RunContractProcedureThenBreak*";
+
     //::testing::GTEST_FLAG(filter) = "NetworkRunRecord*";
     //::testing::GTEST_FLAG(filter) = "NetworkRunRecord_RandomNodeNatures*";
     //::testing::GTEST_FLAG(filter) = "N1n0_RunDiscovery_ExecuteManualContractInput4_Check*";
@@ -29,6 +32,5 @@ int main(int argc, char **argv) {
     //::testing::GTEST_FLAG(filter) = "N1n0_RunDiscovery_ExecuteManualContractInput4_Check*";
     //::testing::GTEST_FLAG(filter) = "Network__DemonstrateCompetitionMeasures*";
     //::testing::GTEST_FLAG(filter) = "NetworkRunTimestampNodeDeletionAndContract*";
-
     return RUN_ALL_TESTS();
 }
